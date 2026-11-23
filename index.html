@@ -140,6 +140,11 @@
 
             <!-- כפתורי סרגל עליון -->
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button type="button" id="apiSettingsBtn" class="relative flex items-center gap-1.5 px-2.5 py-2 text-xs sm:text-sm font-semibold text-slate-600 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-xl transition-colors" title="הגדרות API">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                    <span class="hidden lg:inline">הגדרות API</span>
+                    <span id="apiKeyActiveDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" title="מפתח API אישי פעיל"></span>
+                </button>
                 <button type="button" id="exportBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-indigoInk-800 bg-indigoInk-50 hover:bg-indigoInk-100 border border-indigoInk-200/70 rounded-xl transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     <span class="hidden sm:inline">ייצוא / תוצר</span>
@@ -387,45 +392,80 @@
 
     <!-- ================= מודאל אישור איפוס (יצירה חדשה) ================= -->
     <div id="resetModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 border border-stone-200 text-center">
-            <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden border border-stone-200">
+            <div class="px-5 py-4 border-b border-stone-200 bg-cream">
+                <h3 class="text-base font-bold text-indigoInk-900">התחלת יצירה חדשה?</h3>
             </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-1">להתחיל יצירה חדשה?</h3>
-            <p class="text-sm text-slate-600 mb-5">היצירה הנוכחית והשיחה יתאפסו כדי להתחיל מסע חדש עם בוט קול.</p>
-            <div class="flex items-center justify-center gap-2.5">
-                <button type="button" id="cancelResetBtn" class="flex-1 py-2.5 px-4 text-sm font-semibold text-slate-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
-                <button type="button" id="confirmResetBtn" class="flex-1 py-2.5 px-4 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors">כן, התחל מחדש</button>
+            <div class="p-5 text-sm text-slate-600 leading-relaxed">
+                הפעולה תנקה את היצירה הנוכחית ואת היסטוריית השיחה עם בוט קול. אם תרצי לשמור את העבודה שלך, מומלץ ללחוץ קודם על <strong>"ייצוא / תוצר"</strong>.
+            </div>
+            <div class="px-5 py-3.5 border-t border-stone-200 bg-cream flex items-center justify-end gap-2">
+                <button type="button" id="cancelResetBtn" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
+                <button type="button" id="confirmResetBtn" class="px-4 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors">כן, התחל מחדש</button>
             </div>
         </div>
     </div>
 
-    <!-- ================= מודאל ייצוא / תוצר ================= -->
+    <!-- ================= מודאל ייצוא ותוצר סופי ================= -->
     <div id="exportModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden border border-stone-200">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200">
             <div class="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-cream">
-                <h3 class="text-base font-bold text-indigoInk-900">ייצוא השיחה והתוצר הסופי</h3>
+                <h3 class="text-base font-bold text-indigoInk-900">ייצוא ניתוח היצירה והתוצר הסופי</h3>
                 <button type="button" id="closeExportModalBtn" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-stone-200/60">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
             <div class="p-5 overflow-y-auto flex-1">
-                <p class="text-xs text-slate-500 mb-2">תיעוד מלא של היצירה, מהלך הניתוח עם בוט קול והתוצר הסופי:</p>
-                <textarea id="exportPreviewText" readonly rows="13" class="w-full p-4 text-sm bg-cream border border-stone-200 rounded-xl font-sans leading-relaxed text-slate-800 focus:outline-none"></textarea>
+                <p class="text-xs text-slate-500 mb-2">ניתן להעתיק, להדפיס/לשמור כ-PDF או להוריד כקובץ טקסט מסודר להגשה:</p>
+                <textarea id="exportPreviewText" rows="15" readonly class="w-full p-4 text-xs sm:text-sm leading-relaxed bg-cream border border-stone-300 rounded-xl font-sans text-slate-800 focus:outline-none"></textarea>
             </div>
             <div class="px-5 py-3.5 border-t border-stone-200 bg-cream flex flex-wrap items-center justify-end gap-2">
-                <button type="button" id="copyExportBtn" class="px-4 py-2 text-sm font-semibold text-indigoInk-800 bg-indigoInk-50 hover:bg-indigoInk-100 rounded-xl transition-colors flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <span>העתק הכל</span>
+                <button type="button" id="copyExportBtn" class="px-4 py-2 text-sm font-semibold text-indigoInk-800 bg-indigoInk-50 hover:bg-indigoInk-100 border border-indigoInk-200 rounded-xl transition-colors">
+                    העתקה ללוח
                 </button>
-                <button type="button" id="printExportBtn" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-stone-300 hover:bg-stone-100 rounded-xl transition-colors flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                    <span>הדפסה / PDF</span>
+                <button type="button" id="printExportBtn" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-stone-100 border border-stone-300 rounded-xl transition-colors">
+                    הדפסה / PDF
                 </button>
                 <button type="button" id="downloadExportBtn" class="px-4 py-2 text-sm font-bold text-white bg-indigoInk-700 hover:bg-indigoInk-800 rounded-xl shadow-xs transition-colors flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     <span>הורד קובץ TXT</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= מודאל הגדרות API ================= -->
+    <div id="apiSettingsModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-stone-200">
+            <div class="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-cream">
+                <h3 class="text-base font-bold text-indigoInk-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigoInk-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                    <span>הגדרות חיבור Gemini API</span>
+                </h3>
+                <button type="button" id="closeApiModalBtn" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-stone-200/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="bg-indigoInk-50/70 border border-indigoInk-100 rounded-xl p-3 text-xs text-indigoInk-900 leading-relaxed">
+                    כברירת מחדל (כשהשדה ריק), האפליקציה משתמשת במפתח הסביבה המובנה. אם מתקבלת שגיאת הרשאה (403), ניתן להזין כאן מפתח <strong>Gemini API</strong> אישי — הוא יישמר מקומית בדפדפן שלך בלבד (<code class="font-mono">localStorage</code>).
+                </div>
+
+                <div>
+                    <label for="apiKeyInput" class="block text-xs font-semibold text-slate-700 mb-1.5">מפתח Gemini API אישי (אופציונלי)</label>
+                    <div class="relative">
+                        <input type="password" id="apiKeyInput" dir="ltr" placeholder="AIzaSy..." autocomplete="off" class="w-full pl-16 pr-3.5 py-2.5 text-sm font-mono bg-cream border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoInk-500 focus:bg-white">
+                        <button type="button" id="toggleApiKeyVisibilityBtn" class="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1 text-[11px] font-semibold text-slate-600 hover:text-indigoInk-800 bg-white border border-stone-200 rounded-lg">הצג</button>
+                    </div>
+                    <p id="apiStatusText" class="mt-1.5 text-[11px] text-slate-500"></p>
+                </div>
+            </div>
+            <div class="px-5 py-3.5 border-t border-stone-200 bg-cream flex items-center justify-between gap-2">
+                <button type="button" id="clearApiKeyBtn" class="px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 rounded-xl transition-colors">איפוס לברירת מחדל</button>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="cancelApiModalBtn" class="px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
+                    <button type="button" id="saveApiKeyBtn" class="px-4 py-2 text-xs sm:text-sm font-bold text-white bg-indigoInk-700 hover:bg-indigoInk-800 rounded-xl shadow-xs transition-colors">שמירה</button>
+                </div>
             </div>
         </div>
     </div>
@@ -442,8 +482,8 @@
             // 1. קבועים והגדרות Gemini API
             // ============================================================
             const apiKey = "";
-            const GEMINI_MODEL = "gemini-3-flash-preview";
-            const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + apiKey;
+            const CANVAS_DEFAULT_MODEL = "gemini-2.5-flash-preview-09-2025";
+            const CUSTOM_API_KEY_STORAGE = "bot_kol_custom_gemini_api_key";
 
             const OPENING_MESSAGE = "שלום, קוראים לי בוט קול ואני המלווה שלך לקריאת טקסטים ספרותיים. בואי נצא יחד למסע קסום בתוך היצירה. מוכנה?";
 
@@ -457,58 +497,26 @@
                 { id: 6, label: "תוצר סופי" }
             ];
 
-            // פרומפט מערכת מלא ומדויק עבור בוט קול
-            const BASE_SYSTEM_PROMPT = `# תפקיד וזהות
-שמך הוא בוט קול – מאמן מנוסה ומלווה פדגוגי בקריאת שירה עברית וניתוח יצירות ספרותיות. תפקידך להוביל סטודנטיות וסטודנטים בתהליך חשיבה עצמאי, מעמיק, ענייני ומהנה.
-המטרה שלך אינה ללמד את "הפירוש הנכון" של היצירה, אלא ללמד את הסטודנטית איך לקרוא ולנתח שירה בעצמה.
+            function getCustomApiKey() {
+                try {
+                    return (localStorage.getItem(CUSTOM_API_KEY_STORAGE) || "").trim();
+                } catch (e) {
+                    return "";
+                }
+            }
 
-# עקרונות יסוד וכללי ברזל
-1. מלווה סוקרטי, לא מרצה:
-   - כ-80% מהתגובות שלך יהיו שאלות מנחות, וכ-20% יהיו הכוונה, מידע ממוקד או משוב.
-   - לעולם אל תיתן "פירוש נכון" אחד ואל תדבר במקום הסטודנטית.
-   - הסבר בקצרה למה אתה שואל (למשל: "נעבור למבנה, כדי להבין איך הצורה משרתת את המסר").
-   - בקש תמיד ביסוס מהטקסט (שורה, מילה, דימוי).
-2. דיוק עובדתי ואמינות (אפס המצאות):
-   - הסתמך אך ורק על עובדות, הגדרות ספרותיות מדויקות ומקורות מהימנים. אל תמציא פרטים ביוגרפיים, הקשרים היסטוריים או הגדרות של מושגים. אם אינך בטוח בפרט חיצוני – אל תציין אותו.
-3. משוב אותנטי ומאוזן (ללא חנופת יתר):
-   - הימנע ממחמאות מוגזמות או אוטומטיות על כל תשובה. תן משוב ענייני, מדויק ואמיתי.
-   - אם הסטודנטית כותבת דבר שגוי או לא מבוסס – אל תאמר לה שהיא צודקת, אך גם אל תבטל אותה במילים כמו "טעות" או "לא נכון". במקום זאת, פרק את תשובתה ובדוק יחד איתה: "מעניין איך הגעת לזה – איזו שורה בטקסט תומכת בכך?" או הפנה אותה לשורה שסותרת את דבריה.
-4. קצב ענייני, קצר וממוקד:
-   - שמור על תשובות קצרות ובהירות כדי לא להתיש.
-   - התמקד בנושאים ובצירים המרכזיים של היצירה, ולא בניתוח מילה-אחר-מילה.
-   - התאם את מורכבות השאלות לרמת הסטודנטית (פשט כשקשה, אתגר כשקל).
-   - טון: חם אך מקצועי, סבלני ולא מתנשא. הימנע ממילים מקטינות כמו "למעשה", "בעצם", "פשוט" או "ברור ש...".
-
-# מהלך העבודה והשלבים
-## שלב 0: קליטת היצירה (שלב מקדים – חובה לפני תחילת הניתוח)
-1. לאחר שהסטודנטית מעלה את היצירה, אל תתחיל מיד בשאלות ניתוח.
-2. בקש ממנה לציין מי כתב את היצירה (אם שם היוצר עדיין לא צוין).
-3. שאל אם יש דרישה ספציפית מהמרצה לגבי התוצר הסופי (אם עדיין לא צוינה).
-4. אם השיר ארוך ומחולק לבתים, עדכן אותה שניתן להתקדם בית-אחר-בית ולהוסיף בתים בהמשך.
-
-## שלבי הניתוח (רמות 1 עד 5)
-מגבלת אורך קשיחה: כל תהליך הניתוח – מתחילת שלב 1 ועד סיום שלב 5 (לפני שלב התוצר) – יכלול מקסימום 15 שאלות סך הכל (כ-2 עד 3 שאלות ממוקדות לכל שלב).
-- שלב 1: תצפית ומבנה (Observation) – מה יש בטקסט? מילים בולטות, חזרות, דימויים, התרחשות בסיסית, והתייחסות מפורשת למבנה השיר (חלוקה לבתים, אורך שורות, פיסוק, חריזה).
-- שלב 2: פרשנות ראשונית (Interpretation) – משמעות, רגש ובחירות המשורר.
-- שלב 3: הקשר, מושגים והעמקה (Context & Depth) – שילוב מושגים ספרותיים רלוונטיים (מטאפורה, דימוי, האנשה, סמל, מטונימיה, אנאפורה, אפיפורה, גלישה, מצלול, חריזה) תוך בדיקה אם הסטודנטית מכירה אותם, הסבר קצר ומדויק ובקשת דוגמה מהטקסט; יחס צורה-תוכן; ורקע היסטורי/ביוגרפי מבוסס וקצר (2-3 משפטים) אם רלוונטי.
-- שלב 4: ביקורת ויצירה (Criticism & Creation) – פיתוח קול ביקורתי והערכת בחירות פואטיות.
-- שלב 5: העמקה ברובד תיאורטי – קריאה דרך עדשה פוליטית, מגדרית, חברתית, פסיכולוגית או פוסט-קולוניאלית.
-
-## שלב הסיום: בניית תוצר (רק לאחר מיצוי 5 השלבים)
-הצע לסטודנטית לבחור אחד מ-3 התוצרים (אלא אם הוגדרה דרישת מרצה בשלב 0):
-1. תוצר 1 – קטע מסכם של הניתוח: בנה אותו יחד איתה באמצעות 5 שאלות בלבד (שאלה לכל שלב). רק לאחר שענתה על 5 השאלות, שאל אם תרצה שתארגן את תשובותיה לקטע מסכם שלם וערוך.
-2. תוצר 2 – רפלקציה על תהליך הלמידה: 5 שאלות רפלקטיביות על התהליך.
-3. תוצר 3 – כתיבת טקסט פואטי מתכתב: 5 שאלות מנחות לבניית שיר/קטע פואטי מתכתב.
-
-# טיפול בתרחישים מיוחדים
-- "אני לא מבינה כלום": פשט והתחל ממילה אחת, שורה אחת או תחושה כללית.
-- "מה הפירוש הנכון?": הזכר שאין פירוש יחיד אלא פירושים מבוססים על הטקסט.
-- סטודנטית מתקדמת: עבור מהר יותר לעומק, מבנה-תוכן, ביקורת ורובד תיאורטי.
-
-# הנחיה טכנית נסתרת (חובה בסוף כל תגובה)
-בשורה האחרונה של כל תגובה שלך, צרף אך ורק תגית בפורמט המדויק הבא:
-[[STAGE:X|COUNT_Q:yes]] או [[STAGE:X|COUNT_Q:no]]
-כאשר X הוא מספר השלב הנוכחי (0 עד 6), ו-COUNT_Q הוא yes אם התגובה שלך כוללת שאלת ניתוח/תוצר חדשה ו-no אם לא. אל תסביר תגית זו — המערכת מסירה אותה אוטומטית.`;
+            function setCustomApiKey(value) {
+                try {
+                    const trimmed = String(value || "").trim();
+                    if (trimmed) {
+                        localStorage.setItem(CUSTOM_API_KEY_STORAGE, trimmed);
+                    } else {
+                        localStorage.removeItem(CUSTOM_API_KEY_STORAGE);
+                    }
+                } catch (e) {
+                    // התעלמות משגיאות אחסון מקומי בסביבות מוגבלות
+                }
+            }
 
             // ============================================================
             // 2. מצב האפליקציה (State)
@@ -516,17 +524,17 @@
             const state = {
                 poemText: "",
                 author: "",
-                productRequirement: "בחירה חופשית בסיום",
+                productReq: "בחירה חופשית בסיום",
                 isPoemLoaded: false,
                 currentStage: 0,
                 analysisQuestionsCount: 0,
-                finalQuestionsCount: 0,
-                messages: [],
-                isLoading: false
+                productQuestionsCount: 0,
+                isSending: false,
+                messages: []
             };
 
             // ============================================================
-            // 3. איסוף רכיבי DOM
+            // 3. רכיבי DOM
             // ============================================================
             const el = {
                 printSheet: document.getElementById("printSheet"),
@@ -534,8 +542,11 @@
                 headerCounterBadge: document.getElementById("headerCounterBadge"),
                 mobileCounterBadge: document.getElementById("mobileCounterBadge"),
                 stageStepper: document.getElementById("stageStepper"),
+                apiSettingsBtn: document.getElementById("apiSettingsBtn"),
+                apiKeyActiveDot: document.getElementById("apiKeyActiveDot"),
                 exportBtn: document.getElementById("exportBtn"),
                 resetBtn: document.getElementById("resetBtn"),
+                // מובייל
                 mobileTabPoem: document.getElementById("mobileTabPoem"),
                 mobileTabChat: document.getElementById("mobileTabChat"),
                 mobilePoemDot: document.getElementById("mobilePoemDot"),
@@ -552,7 +563,7 @@
                 setupAuthorInput: document.getElementById("setupAuthorInput"),
                 setupProductReqSelect: document.getElementById("setupProductReqSelect"),
                 loadPoemStartBtn: document.getElementById("loadPoemStartBtn"),
-                // תצוגת יצירה טעונה
+                // תצוגת יצירה
                 poemReaderView: document.getElementById("poemReaderView"),
                 addStanzaBtn: document.getElementById("addStanzaBtn"),
                 editPoemBtn: document.getElementById("editPoemBtn"),
@@ -573,7 +584,7 @@
                 chatImageInput: document.getElementById("chatImageInput"),
                 chatInput: document.getElementById("chatInput"),
                 sendBtn: document.getElementById("sendBtn"),
-                // מודאל הוספת בית
+                // מודאל בית נוסף
                 stanzaModal: document.getElementById("stanzaModal"),
                 closeStanzaModalBtn: document.getElementById("closeStanzaModalBtn"),
                 stanzaOcrBtn: document.getElementById("stanzaOcrBtn"),
@@ -593,101 +604,95 @@
                 copyExportBtn: document.getElementById("copyExportBtn"),
                 printExportBtn: document.getElementById("printExportBtn"),
                 downloadExportBtn: document.getElementById("downloadExportBtn"),
+                // מודאל הגדרות API
+                apiSettingsModal: document.getElementById("apiSettingsModal"),
+                closeApiModalBtn: document.getElementById("closeApiModalBtn"),
+                cancelApiModalBtn: document.getElementById("cancelApiModalBtn"),
+                apiKeyInput: document.getElementById("apiKeyInput"),
+                toggleApiKeyVisibilityBtn: document.getElementById("toggleApiKeyVisibilityBtn"),
+                apiStatusText: document.getElementById("apiStatusText"),
+                clearApiKeyBtn: document.getElementById("clearApiKeyBtn"),
+                saveApiKeyBtn: document.getElementById("saveApiKeyBtn"),
                 // Toast
                 toast: document.getElementById("toast")
             };
 
             // ============================================================
-            // 4. פונקציות עזר ורינדור ממשק
+            // 4. פונקציות עזר ותצוגה (UI Helpers)
             // ============================================================
             let toastTimer = null;
-            function showToast(msg) {
-                el.toast.textContent = msg;
+            function showToast(text) {
+                el.toast.textContent = text;
                 el.toast.classList.remove("opacity-0", "pointer-events-none");
-                el.toast.classList.add("opacity-100");
                 if (toastTimer) clearTimeout(toastTimer);
                 toastTimer = setTimeout(function () {
-                    el.toast.classList.remove("opacity-100");
                     el.toast.classList.add("opacity-0", "pointer-events-none");
                 }, 2800);
             }
 
             function escapeHtml(str) {
-                return String(str)
+                return String(str || "")
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
                     .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;");
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
             }
 
-            function formatMessageHtml(text, isUser) {
-                let html = escapeHtml(text);
-                const strongCls = isUser ? "font-bold text-white" : "font-bold text-indigoInk-900";
-                html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="' + strongCls + '">$1</strong>');
-                html = html.replace(/\*(.+?)\*/g, '<em class="italic">$1</em>');
-                html = html.replace(/^&gt;\s?(.+)$/gm, '<blockquote class="border-r-2 border-goldSoft-600 pr-3 my-1.5 opacity-90 italic">$1</blockquote>');
-                html = html.replace(/^[-•]\s+(.+)$/gm, '<div class="flex items-start gap-2 my-1"><span class="text-goldSoft-600 font-bold">•</span><span>$1</span></div>');
-                html = html.replace(/\n/g, "<br>");
-                return html;
+            function formatMessageHtml(text) {
+                let safe = escapeHtml(text);
+                // הדגשה **טקסט**
+                safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-indigoInk-900">$1</strong>');
+                // הטיה *טקסט*
+                safe = safe.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em class="italic">$2</em>');
+                // שבירות שורה
+                safe = safe.replace(/\n/g, "<br>");
+                return safe;
             }
 
             function autoResizeChatInput() {
                 el.chatInput.style.height = "auto";
-                el.chatInput.style.height = Math.min(el.chatInput.scrollHeight, 140) + "px";
+                el.chatInput.style.height = Math.min(el.chatInput.scrollHeight, 144) + "px";
             }
 
             function switchMobileTab(tab) {
-                if (tab === "poem") {
-                    el.poemPanel.classList.remove("hidden");
-                    el.poemPanel.classList.add("flex");
-                    el.chatPanel.classList.add("hidden");
-                    el.chatPanel.classList.remove("flex");
-
-                    el.mobileTabPoem.classList.add("text-indigoInk-800", "border-indigoInk-700");
-                    el.mobileTabPoem.classList.remove("text-slate-500", "border-transparent");
-                    el.mobileTabChat.classList.remove("text-indigoInk-800", "border-indigoInk-700");
-                    el.mobileTabChat.classList.add("text-slate-500", "border-transparent");
-                } else {
+                if (tab === "chat") {
+                    el.poemPanel.classList.add("hidden", "lg:flex");
                     el.chatPanel.classList.remove("hidden");
                     el.chatPanel.classList.add("flex");
-                    el.poemPanel.classList.add("hidden");
-                    el.poemPanel.classList.remove("flex");
-
-                    el.mobileTabChat.classList.add("text-indigoInk-800", "border-indigoInk-700");
-                    el.mobileTabChat.classList.remove("text-slate-500", "border-transparent");
-                    el.mobileTabPoem.classList.remove("text-indigoInk-800", "border-indigoInk-700");
-                    el.mobileTabPoem.classList.add("text-slate-500", "border-transparent");
+                    el.mobileTabChat.className = "flex-1 py-2.5 text-sm font-semibold text-indigoInk-800 border-b-2 border-indigoInk-700 transition-colors flex items-center justify-center gap-1.5";
+                    el.mobileTabPoem.className = "flex-1 py-2.5 text-sm font-semibold text-slate-500 border-b-2 border-transparent transition-colors flex items-center justify-center gap-1.5";
+                } else {
+                    el.poemPanel.classList.remove("hidden");
+                    el.chatPanel.classList.add("hidden", "lg:flex");
+                    el.mobileTabPoem.className = "flex-1 py-2.5 text-sm font-semibold text-indigoInk-800 border-b-2 border-indigoInk-700 transition-colors flex items-center justify-center gap-1.5";
+                    el.mobileTabChat.className = "flex-1 py-2.5 text-sm font-semibold text-slate-500 border-b-2 border-transparent transition-colors flex items-center justify-center gap-1.5";
                 }
             }
 
             function renderProgress() {
-                const idx = state.currentStage;
-                el.stageStepper.innerHTML = STAGES.map(function (st) {
-                    const active = st.id === idx;
-                    const done = st.id < idx;
-                    let cls = "px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition-colors flex items-center gap-1 ";
-                    if (active) {
-                        cls += "bg-indigoInk-700 text-white font-bold shadow-xs";
-                    } else if (done) {
-                        cls += "bg-emerald-50 text-emerald-800 border border-emerald-200";
-                    } else {
-                        cls += "bg-white text-slate-500 border border-stone-200";
-                    }
-                    const icon = done
-                        ? '<svg class="w-3 h-3 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
-                        : "";
-                    return '<div class="' + cls + '">' + icon + "<span>" + st.label + "</span></div>";
-                }).join('<span class="text-stone-300 text-xs">←</span>');
+                const activeStage = STAGES[state.currentStage] || STAGES[0];
+                el.headerStageBadge.textContent = activeStage.label;
 
-                const currentStageObj = STAGES[idx] || STAGES[0];
-                el.headerStageBadge.textContent = currentStageObj.label;
-
-                const counterText = idx === 6
-                    ? "שאלות תוצר: " + Math.min(state.finalQuestionsCount, 5) + " / 5"
-                    : "שאלות ניתוח: " + Math.min(state.analysisQuestionsCount, 15) + " / 15";
+                const counterText = state.currentStage < 6
+                    ? "שאלות ניתוח: " + state.analysisQuestionsCount + " / 15"
+                    : "שאלות תוצר: " + Math.min(state.productQuestionsCount, 5) + " / 5";
 
                 el.headerCounterBadge.textContent = counterText;
                 el.mobileCounterBadge.textContent = counterText;
+
+                el.stageStepper.innerHTML = STAGES.map(function (st, idx) {
+                    let cls = "px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap ";
+                    if (st.id === state.currentStage) {
+                        cls += "bg-indigoInk-800 text-white shadow-xs";
+                    } else if (st.id < state.currentStage) {
+                        cls += "bg-indigoInk-100 text-indigoInk-900";
+                    } else {
+                        cls += "bg-white text-slate-500 border border-stone-200";
+                    }
+                    const arrow = idx < STAGES.length - 1 ? '<span class="text-stone-300 text-xs select-none">←</span>' : "";
+                    return '<span class="' + cls + '">' + st.label + '</span>' + arrow;
+                }).join("");
             }
 
             function renderPoemPanel() {
@@ -695,9 +700,6 @@
                     el.poemUploadView.classList.remove("hidden");
                     el.poemReaderView.classList.add("hidden");
                     el.mobilePoemDot.classList.add("hidden");
-                    el.setupPoemTextarea.value = state.poemText;
-                    el.setupAuthorInput.value = state.author;
-                    el.setupProductReqSelect.value = state.productRequirement;
                     return;
                 }
 
@@ -706,19 +708,19 @@
                 el.mobilePoemDot.classList.remove("hidden");
 
                 el.loadedAuthorInput.value = state.author;
-                el.loadedProductReqSelect.value = state.productRequirement;
+                el.loadedProductReqSelect.value = state.productReq;
 
-                const rawLines = state.poemText.split("\n");
+                const rawLines = state.poemText.split(/\r?\n/);
                 let lineNum = 0;
                 const rowsHtml = rawLines.map(function (line) {
                     const trimmed = line.trim();
                     if (!trimmed) {
-                        return '<div class="h-4"></div>';
+                        return '<div class="h-3" aria-hidden="true"></div>';
                     }
                     lineNum++;
                     const safeLine = escapeHtml(trimmed);
                     return (
-                        '<div class="poem-line group flex items-baseline gap-3 px-2 py-0.5 rounded-lg cursor-pointer" data-quote="' + safeLine + '" title="לחצי לציטוט שורה זו לשיחה">' +
+                        '<div class="poem-line group flex items-baseline gap-3 px-2 py-0.5 rounded-lg cursor-pointer" data-line-num="' + lineNum + '" data-quote="' + safeLine + '" title="לחצי לציטוט שורה זו לשיחה">' +
                             '<span class="text-[11px] font-sans text-stone-400 w-5 text-left select-none shrink-0">' + lineNum + '</span>' +
                             '<span class="flex-1">' + safeLine + '</span>' +
                             '<span class="opacity-0 group-hover:opacity-100 text-[10px] font-sans text-goldSoft-800 bg-goldSoft-100 px-1.5 py-0.5 rounded shrink-0 transition-opacity">צטט</span>' +
@@ -731,12 +733,13 @@
 
                 el.poemLinesContainer.querySelectorAll(".poem-line").forEach(function (row) {
                     row.addEventListener("click", function () {
+                        const num = row.getAttribute("data-line-num");
                         const quote = row.getAttribute("data-quote");
                         const prev = el.chatInput.value.trim();
-                        el.chatInput.value = (prev ? prev + " " : "") + '"' + quote + '" ';
+                        el.chatInput.value = (prev ? prev + " " : "") + '"שורה ' + num + ': ' + quote + '" ';
                         autoResizeChatInput();
                         el.chatInput.focus();
-                        showToast("השורה צוטטה לתיבת הצ'אט");
+                        showToast("שורה " + num + " צוטטה לתיבת הצ'אט");
                         if (window.innerWidth < 1024) {
                             switchMobileTab("chat");
                         }
@@ -755,31 +758,35 @@
                         if (msg.isError) {
                             errorAction =
                                 '<div class="mt-2.5 pt-2 border-t border-rose-200/70 flex flex-wrap items-center justify-between gap-2">' +
-                                    '<span class="text-xs text-rose-700">' + escapeHtml(msg.errorDetail || "תקלת חיבור זמנית") + '</span>' +
-                                    '<button type="button" class="retry-btn px-3 py-1.5 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors shrink-0">נסה שוב</button>' +
+                                    '<span class="text-xs text-rose-700" dir="auto">' + escapeHtml(msg.errorDetail || "תקלת חיבור זמנית") + '</span>' +
+                                    '<div class="flex items-center gap-2 shrink-0">' +
+                                        '<button type="button" class="open-api-settings-btn px-3 py-1.5 text-xs font-semibold bg-white hover:bg-rose-100 text-rose-800 border border-rose-300 rounded-lg transition-colors">הגדרות API</button>' +
+                                        '<button type="button" class="retry-btn px-3 py-1.5 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors">נסה שוב</button>' +
+                                    '</div>' +
                                 '</div>';
                         }
 
                         return (
                             '<div class="flex items-start gap-2.5 max-w-3xl">' +
-                                '<div class="w-8 h-8 rounded-xl bg-indigoInk-900 text-goldSoft-200 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">' +
+                                '<div class="w-8 h-8 rounded-full bg-indigoInk-900 text-goldSoft-200 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">' +
                                     '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/></svg>' +
                                 '</div>' +
-                                '<div class="' + bubbleCls + '">' +
-                                    formatMessageHtml(msg.text, false) +
+                                '<div class="' + bubbleCls + ' flex-1">' +
+                                    '<div>' + formatMessageHtml(msg.text) + '</div>' +
                                     errorAction +
                                 '</div>' +
                             '</div>'
                         );
-                    } else {
-                        return (
-                            '<div class="flex items-start justify-end gap-2.5">' +
-                                '<div class="bg-indigoInk-700 text-white rounded-2xl rounded-tl-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed max-w-2xl shadow-xs">' +
-                                    formatMessageHtml(msg.text, true) +
-                                '</div>' +
-                            '</div>'
-                        );
                     }
+
+                    // הודעת סטודנטית
+                    return (
+                        '<div class="flex items-start justify-end">' +
+                            '<div class="bg-indigoInk-700 text-white rounded-2xl rounded-tl-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed shadow-xs max-w-[85%] sm:max-w-2xl">' +
+                                formatMessageHtml(msg.text) +
+                            '</div>' +
+                        '</div>'
+                    );
                 }).join("");
 
                 el.chatMessages.querySelectorAll(".retry-btn").forEach(function (btn) {
@@ -788,358 +795,433 @@
                     });
                 });
 
+                el.chatMessages.querySelectorAll(".open-api-settings-btn").forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        openApiSettingsModal();
+                    });
+                });
+
                 el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
             }
 
-            // ============================================================
-            // 5. תקשורת מאומתת עם Gemini API (Backoff + סינון היסטוריה)
-            // ============================================================
-            async function callGeminiWithBackoff(payload, maxRetries) {
-                const retries = typeof maxRetries === "number" ? maxRetries : 4;
-                let delay = 1000;
-
-                for (let attempt = 0; attempt <= retries; attempt++) {
-                    try {
-                        const res = await fetch(GEMINI_URL, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (!res.ok) {
-                            let errText = "שגיאת שרת (" + res.status + ")";
-                            try {
-                                const errData = await res.json();
-                                if (errData && errData.error && errData.error.message) {
-                                    errText = errData.error.message;
-                                }
-                            } catch (e) {
-                                // התעלמות
-                            }
-
-                            if (res.status === 429 || res.status >= 500) {
-                                throw new Error(errText);
-                            }
-                            const nonRetryErr = new Error(errText);
-                            nonRetryErr.fatal = true;
-                            throw nonRetryErr;
-                        }
-
-                        const data = await res.json();
-                        const text = data &&
-                            data.candidates &&
-                            data.candidates[0] &&
-                            data.candidates[0].content &&
-                            data.candidates[0].content.parts &&
-                            data.candidates[0].content.parts[0] &&
-                            data.candidates[0].content.parts[0].text;
-
-                        if (!text) {
-                            throw new Error("התקבלה תשובה ריקה מהמודל");
-                        }
-                        return text;
-                    } catch (err) {
-                        if (err.fatal || attempt === retries) {
-                            throw err;
-                        }
-                        await new Promise(function (resolve) { setTimeout(resolve, delay); });
-                        delay *= 2;
-                    }
-                }
-            }
-
-            function readImageAsBase64(file) {
-                return new Promise(function (resolve, reject) {
-                    const reader = new FileReader();
-                    reader.onload = function () {
-                        const dataUrl = String(reader.result || "");
-                        const parts = dataUrl.split(",");
-                        if (parts.length < 2) {
-                            reject(new Error("קובץ התמונה אינו תקין"));
-                            return;
-                        }
-                        resolve({
-                            mimeType: file.type || "image/jpeg",
-                            data: parts[1]
-                        });
-                    };
-                    reader.onerror = function () {
-                        reject(new Error("שגיאה בקריאת התמונה"));
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            async function extractTextFromImage(file) {
-                const img = await readImageAsBase64(file);
-                const payload = {
-                    contents: [{
-                        role: "user",
-                        parts: [
-                            {
-                                text: "חלץ במדויק את כל הטקסט הספרותי (שיר או פרוזה) המופיע בתמונה בעברית. שמור על שבירת השורות המקורית, הרווחים בין הבתים, סימני הפיסוק והניקוד אם קיים. החזר אך ורק את הטקסט המחולץ ללא שום הקדמה או הסבר."
-                            },
-                            {
-                                inlineData: {
-                                    mimeType: img.mimeType,
-                                    data: img.data
-                                }
-                            }
-                        ]
-                    }]
-                };
-                const extracted = await callGeminiWithBackoff(payload, 3);
-                return extracted.trim();
-            }
-
-            function buildSystemInstruction() {
-                const stageName = (STAGES[state.currentStage] || STAGES[0]).label;
-                let dynamicBlock = "\n\n---\n# מצב מערכת נוכחי\n";
-                dynamicBlock += "[סטטוס מערכת: שלב נוכחי " + state.currentStage + " (" + stageName + "), שאלת ניתוח " + state.analysisQuestionsCount + " מתוך 15]\n";
-
-                if (state.poemText.trim()) {
-                    dynamicBlock += "היצירה הספרותית שהסטודנטית העלתה:\n\"\"\"\n" + state.poemText.trim() + "\n\"\"\"\n";
+            function updateApiKeyIndicator() {
+                const customKey = getCustomApiKey();
+                if (customKey) {
+                    el.apiKeyActiveDot.classList.remove("hidden");
+                    el.apiStatusText.textContent = "מצב פעיל: מפתח API אישי שמור בדפדפן (מודל gemini-2.5-flash עם גיבוי ל-gemini-2.0-flash).";
                 } else {
-                    dynamicBlock += "היצירה: טרם נטענה יצירה בפאנל היצירה. הזמן את הסטודנטית להדביק או להעלות אותה.\n";
+                    el.apiKeyActiveDot.classList.add("hidden");
+                    el.apiStatusText.textContent = "מצב פעיל: חיבור סביבה מובנה (" + CANVAS_DEFAULT_MODEL + ").";
                 }
-
-                dynamicBlock += "שם היוצר/ת: " + (state.author.trim() ? state.author.trim() : "טרם צוין (בקש ממנה לציין בשלב 0 לפני תחילת הניתוח)") + "\n";
-                dynamicBlock += "דרישת תוצר מהמרצה: " + state.productRequirement + "\n";
-
-                if (state.currentStage >= 1 && state.currentStage <= 5 && state.analysisQuestionsCount >= 13 && state.analysisQuestionsCount < 15) {
-                    dynamicBlock += "שים לב: מתקרבים למגבלת 15 שאלות הניתוח. היערך לעבור לשלב 6 (תוצר סופי).\n";
-                }
-                if (state.currentStage < 6 && state.analysisQuestionsCount >= 15) {
-                    dynamicBlock += "הגעת ל-15 שאלות ניתוח! אל תשאל עוד שאלות ניתוח — עבור כעת לשלב 6 (תוצר סופי) והצע את אפשרויות התוצר (עם [[STAGE:6|COUNT_Q:no]]).\n";
-                }
-                if (state.currentStage === 6) {
-                    dynamicBlock += "[סטטוס תוצר סופי: שאלת תוצר " + state.finalQuestionsCount + " מתוך 5]\n";
-                }
-
-                return BASE_SYSTEM_PROMPT + dynamicBlock;
             }
 
-            // בונה מערך contents תקין: ללא הודעת פתיחה וללא שגיאות, מתחיל ב-user, סירוגין קפדני
+            function openApiSettingsModal() {
+                el.apiKeyInput.value = getCustomApiKey();
+                el.apiKeyInput.type = "password";
+                el.toggleApiKeyVisibilityBtn.textContent = "הצג";
+                updateApiKeyIndicator();
+                el.apiSettingsModal.classList.remove("hidden");
+                el.apiKeyInput.focus();
+            }
+
+            function closeApiSettingsModal() {
+                el.apiSettingsModal.classList.add("hidden");
+            }
+
+            // ============================================================
+            // 5. בניית פרומפט המערכת ותקשורת עם Gemini API
+            // ============================================================
+            function buildSystemPrompt() {
+                const poemSection = state.isPoemLoaded
+                    ? "היצירה שנמצאת כרגע בעבודה:\n---\n" + state.poemText + "\n---\nשם היוצר/ת שצוין: " + (state.author || "טרם צוין — בקש מהסטודנטית לציין בשלב 0") + "\nדרישת תוצר מהמרצה: " + state.productReq
+                    : "טרם הועלתה יצירה למערכת. הזמן את הסטודנטית להעלות או להדביק יצירה ספרותית בפאנל הימני (או להדביק כאן בצ'אט).";
+
+                const statusSection =
+                    "[סטטוס מערכת חי]\n" +
+                    "- שלב נוכחי: " + (STAGES[state.currentStage] ? STAGES[state.currentStage].label : "0. קליטת היצירה") + "\n" +
+                    "- מונה שאלות ניתוח (שלבים 1–5): " + state.analysisQuestionsCount + " מתוך 15 מקסימום.\n" +
+                    "- מונה שאלות תוצר (שלב 6): " + state.productQuestionsCount + " מתוך 5 מקסימום.\n" +
+                    (state.analysisQuestionsCount >= 14 && state.currentStage < 6
+                        ? "⚠️ שים לב: הגעת לסף 15 השאלות של שלבי הניתוח! סכם בקצרה את המעבר ועבור מיד לשלב 6 (בחירה/התחלה של התוצר הסופי).\n"
+                        : "");
+
+                return [
+                    "# תפקיד וזהות",
+                    "שמך הוא בוט קול — מאמן מנוסה ומלווה פדגוגי בקריאת שירה עברית וניתוח יצירות ספרותיות. תפקידך להוביל סטודנטיות וסטודנטים בתהליך חשיבה עצמאי, מעמיק, ענייני ומהנה.",
+                    "המטרה שלך אינה ללמד את 'הפירוש הנכון' של היצירה, אלא ללמד את הסטודנטית איך לקרוא ולנתח שירה בעצמה.",
+                    "",
+                    "# עקרונות יסוד וכללי ברזל",
+                    "1. מלווה סוקרטי, לא מרצה: כ-80% מהתגובה שאלות מנחות, כ-20% הכוונה, מידע ממוקד או משוב. לעולם אל תיתן 'פירוש נכון' אחד. הסבר בקצרה למה אתה שואל ובקש תמיד ביסוס מהטקסט (שורה/מילה/דימוי).",
+                    "2. דיוק עובדתי ואמינות: הסתמך אך ורק על עובדות, הגדרות ספרותיות מדויקות ומקורות מהימנים. אל תמציא פרטים ביוגרפיים, הקשרים היסטוריים או הגדרות.",
+                    "3. משוב אותנטי ומאוזן ללא חנופת יתר: אל תחמיא בהגזמה על כל תשובה. אם התשובה שגויה או לא מבוססת — אל תאמר 'נכון' ואל תאמר 'טעות', אלא פרק ובקש דוגמה תומכת מהטקסט או הצג שורה סותרת.",
+                    "4. קצב ענייני, קצר וממוקד: תשובות קצרות ובהירות, התמקדות בצירים המרכזיים של הטקסט ולא בכל מילה בנפרד. הימנע ממילים מקטינות כמו 'למעשה', 'בעצם', 'פשוט' או 'ברור ש...'.",
+                    "",
+                    "# מהלך העבודה והשלבים",
+                    "- שלב 0 (קליטת היצירה): לפני תחילת הניתוח ודא שידוע מי כתב את היצירה (אם לא צוין — בקש לציין), ודא אם יש דרישת תוצר ספציפית מהמרצה, ואם השיר מרובה בתים עדכן שניתן להוסיף בתים בהדרגה באמצעות כפתור '+ הוסף בית'. אם שם היוצר ודרישת התוצר כבר מופיעים למעלה — אשר בקצרה ועבור ישירות לשאלה הראשונה של שלב 1.",
+                    "- שלב 1 (תצפית ומבנה): מילים בולטות, חזרות, דימויים, התרחשות בסיסית, והתייחסות מפורשת למבנה החיצוני של השיר (בתים, אורך שורות, פיסוק, חריזה).",
+                    "- שלב 2 (פרשנות ראשונית): משמעות, רגש ואווירה, למה המשורר בחר במילה או בדימוי.",
+                    "- שלב 3 (הקשר, מושגים והעמקה): שלב מושגים רלוונטיים (מטאפורה, דימוי, האנשה, סמל, מטונימיה, אנאפורה, אפיפורה, גלישה, מצלול, חריזה) — בדוק היכרות, הסבר בקצרה ובמדויק ובקש דוגמה. שלב יחס צורה-תוכן, אינטרטקסט ורקע היסטורי/ביוגרפי מבוסס (2–3 משפטים רק אם רלוונטי, ומיד חזרה לטקסט).",
+                    "- שלב 4 (ביקורת ויצירה): הערכת בחירות פואטיות, מה עובד, מה הסטודנטית הייתה משנה.",
+                    "- שלב 5 (רובד תיאורטי): קריאה דרך עדשה תיאורטית רלוונטית (פוליטית, מגדרית, חברתית, פסיכולוגית וכו').",
+                    "⚠️ מגבלת אורך קשיחה: שלבים 1 עד 5 יכללו מקסימום 15 שאלות סך הכל (2–3 שאלות לשלב).",
+                    "- שלב 6 (תוצר סופי — רק לאחר מיצוי 5 השלבים): הצע בחירה בין 3 תוצרים (אלא אם הוגדרה דרישת מרצה):",
+                    "  1. קטע מסכם: 5 שאלות בלבד (אחת לכל שלב). אל תכתוב במקומה; רק לאחר 5 השאלות שאל אם היא רוצה שתארגן את תשובותיה לקטע שלם וערוך.",
+                    "  2. רפלקציה על תהליך הלמידה: 5 שאלות רפלקטיביות.",
+                    "  3. כתיבת טקסט פואטי מתכתב: 5 שאלות לבניית טקסט פואטי.",
+                    "",
+                    "# תגית מערכת חובה בסוף כל תגובה",
+                    "בסוף כל תגובה שלך, בשורה נפרדת בסוף הטקסט, הוסף אך ורק תגית טכנית בפורמט: [[STAGE:X]] כאשר X הוא מספר השלב הנוכחי (0, 1, 2, 3, 4, 5 או 6). התגית תוסתר מהמשתמשת ותעדכן את סרגל ההתקדמות.",
+                    "",
+                    poemSection,
+                    "",
+                    statusSection
+                ].join("\n");
+            }
+
             function buildGeminiContents() {
-                const valid = state.messages.filter(function (m) {
+                const filtered = state.messages.filter(function (m) {
                     return !m.isGreeting && !m.isError && m.text && m.text.trim().length > 0;
                 });
 
-                const contents = [];
-                for (let i = 0; i < valid.length; i++) {
-                    const msg = valid[i];
-                    const role = msg.role === "model" ? "model" : "user";
+                // וידוא שההודעה הראשונה היא תמיד של user
+                let startIdx = 0;
+                while (startIdx < filtered.length && filtered[startIdx].role !== "user") {
+                    startIdx++;
+                }
 
-                    // מוודא התחלה ב-user
-                    if (contents.length === 0 && role !== "user") {
-                        continue;
-                    }
-
-                    // מיזוג הודעות עוקבות מאותו תפקיד
-                    const last = contents.length > 0 ? contents[contents.length - 1] : null;
-                    if (last && last.role === role) {
-                        last.parts[0].text += "\n\n" + msg.text.trim();
+                const cleanTurns = [];
+                for (let i = startIdx; i < filtered.length; i++) {
+                    const item = filtered[i];
+                    const role = item.role === "model" ? "model" : "user";
+                    if (cleanTurns.length > 0 && cleanTurns[cleanTurns.length - 1].role === role) {
+                        cleanTurns[cleanTurns.length - 1].parts[0].text += "\n\n" + item.text;
                     } else {
-                        contents.push({
+                        cleanTurns.push({
                             role: role,
-                            parts: [{ text: msg.text.trim() }]
+                            parts: [{ text: item.text }]
                         });
                     }
                 }
-                return contents;
+                return cleanTurns;
             }
 
-            function parseBotReply(rawText) {
-                let cleanText = rawText;
-                let parsedStage = null;
-                let countQ = null;
+            async function callGeminiWithBackoff(payload, maxRetries) {
+                const retries = typeof maxRetries === "number" ? maxRetries : 4;
+                const customKey = getCustomApiKey();
+                const activeKey = customKey || apiKey;
+                const modelsToTry = customKey
+                    ? ["gemini-2.5-flash", "gemini-2.0-flash"]
+                    : [CANVAS_DEFAULT_MODEL];
 
-                // תמיכה בתגית [[STAGE:X|COUNT_Q:yes/no]] וגם בתגית קצרה [[STAGE:X]]
-                const fullTagRegex = /\[{1,2}STAGE:([0-6])(?:\s*\|\s*COUNT_Q:(yes|no))?\]{1,2}/i;
-                const match = rawText.match(fullTagRegex);
-                if (match) {
-                    parsedStage = parseInt(match[1], 10);
-                    if (match[2]) {
-                        countQ = match[2].toLowerCase() === "yes";
+                let lastError = new Error("שגיאת חיבור ל-Gemini API");
+
+                for (let mIdx = 0; mIdx < modelsToTry.length; mIdx++) {
+                    const model = modelsToTry[mIdx];
+                    const hasFallbackModel = mIdx < modelsToTry.length - 1;
+                    const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(activeKey);
+                    let delay = 1000;
+
+                    for (let attempt = 0; attempt <= retries; attempt++) {
+                        try {
+                            const res = await fetch(url, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (!res.ok) {
+                                let errText = "שגיאת שרת (" + res.status + ")";
+                                try {
+                                    const errData = await res.json();
+                                    if (errData && errData.error && errData.error.message) {
+                                        errText = errData.error.message;
+                                    }
+                                } catch (e) {
+                                    // התעלמות משגיאת פענוח JSON
+                                }
+
+                                // מעבר אוטומטי למודל גיבוי בשגיאות 403/404
+                                if ((res.status === 403 || res.status === 404) && hasFallbackModel) {
+                                    lastError = new Error(errText);
+                                    break;
+                                }
+
+                                // ניסיון חוזר עם Backoff בשגיאות 429 או 5xx
+                                if (res.status === 429 || res.status >= 500) {
+                                    throw new Error(errText);
+                                }
+
+                                const nonRetryErr = new Error(errText);
+                                nonRetryErr.fatal = true;
+                                throw nonRetryErr;
+                            }
+
+                            const data = await res.json();
+                            const text = data &&
+                                data.candidates &&
+                                data.candidates[0] &&
+                                data.candidates[0].content &&
+                                data.candidates[0].content.parts &&
+                                data.candidates[0].content.parts[0] &&
+                                data.candidates[0].content.parts[0].text;
+
+                            if (!text) {
+                                throw new Error("התקבלה תשובה ריקה מהמודל");
+                            }
+                            return text;
+                        } catch (err) {
+                            lastError = err;
+                            if (err.fatal) {
+                                if (hasFallbackModel) break;
+                                throw err;
+                            }
+                            if (attempt === retries) {
+                                if (hasFallbackModel) break;
+                                throw err;
+                            }
+                            await new Promise(function (resolve) { setTimeout(resolve, delay); });
+                            delay *= 2;
+                        }
                     }
-                    cleanText = rawText.replace(/\[{1,2}STAGE:[0-6](?:\s*\|\s*COUNT_Q:(?:yes|no))?\]{1,2}/gi, "").trim();
                 }
 
-                // עדכון שלב
-                if (parsedStage !== null) {
-                    state.currentStage = parsedStage;
+                throw lastError;
+            }
+
+            function parseAndApplyStageTag(rawText) {
+                let cleaned = String(rawText || "").trim();
+                const stageMatch = cleaned.match(/\[\[\s*STAGE\s*:\s*([0-6])\s*\]\]/i);
+                if (stageMatch) {
+                    const parsedStage = parseInt(stageMatch[1], 10);
+                    if (!isNaN(parsedStage) && parsedStage >= 0 && parsedStage <= 6) {
+                        state.currentStage = Math.max(state.currentStage, parsedStage);
+                    }
+                    cleaned = cleaned.replace(/\[\[\s*STAGE\s*:\s*[0-6]\s*\]\]/gi, "").trim();
                 }
 
-                // מנגנון fallback אם COUNT_Q לא סופק: בודק אם יש סימן שאלה בתגובה
-                const shouldCount = countQ !== null ? countQ : cleanText.indexOf("?") !== -1;
-
-                if (shouldCount) {
-                    if (state.currentStage >= 1 && state.currentStage <= 5) {
+                // עדכון מונה השאלות לפי השלב
+                if (state.currentStage >= 1 && state.currentStage <= 5) {
+                    if (state.analysisQuestionsCount < 15) {
                         state.analysisQuestionsCount++;
-                    } else if (state.currentStage === 6) {
-                        state.finalQuestionsCount++;
+                    }
+                } else if (state.currentStage === 6) {
+                    if (state.productQuestionsCount < 5) {
+                        state.productQuestionsCount++;
                     }
                 }
 
-                return cleanText;
+                return cleaned;
             }
 
             async function requestBotResponse() {
-                if (state.isLoading) return;
+                if (state.isSending) return;
+
+                // הסרת הודעת שגיאה קודמת לפני ניסיון חדש
+                if (state.messages.length > 0 && state.messages[state.messages.length - 1].isError) {
+                    state.messages.pop();
+                }
 
                 const contents = buildGeminiContents();
                 if (contents.length === 0) return;
 
-                // ניקוי הודעות שגיאה קודמות לפני ניסיון מחדש
-                state.messages = state.messages.filter(function (m) { return !m.isError; });
-                renderMessages();
-
-                state.isLoading = true;
+                state.isSending = true;
                 el.sendBtn.disabled = true;
                 el.typingIndicator.classList.remove("hidden");
-                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+                renderMessages();
 
                 try {
                     const payload = {
-                        contents: contents,
                         systemInstruction: {
-                            parts: [{ text: buildSystemInstruction() }]
+                            parts: [{ text: buildSystemPrompt() }]
+                        },
+                        contents: contents,
+                        generationConfig: {
+                            temperature: 0.6
                         }
                     };
 
-                    const rawReply = await callGeminiWithBackoff(payload, 4);
-                    const cleanReply = parseBotReply(rawReply);
+                    const rawReply = await callGeminiWithBackoff(payload, 3);
+                    const cleanReply = parseAndApplyStageTag(rawReply);
 
-                    state.messages.push({ role: "model", text: cleanReply });
+                    state.messages.push({
+                        role: "model",
+                        text: cleanReply
+                    });
                     renderProgress();
                     renderMessages();
                 } catch (err) {
+                    console.error("Bot Kol API error:", err);
                     state.messages.push({
                         role: "model",
                         isError: true,
-                        errorDetail: err && err.message ? err.message : "תקלת חיבור לשרת",
-                        text: "אירעה תקלה זמנית בשליחת ההודעה לבוט קול. ההודעה שלך נשמרה — לחצי על 'נסה שוב'."
+                        text: "אירעה תקלה זמנית בשליחת ההודעה לבוט קול. ההודעה שלך נשמרה — לחצי על 'נסה שוב' או בדקי את הגדרות ה-API.",
+                        errorDetail: err && err.message ? err.message : "תקלת תקשורת"
                     });
                     renderMessages();
                 } finally {
-                    state.isLoading = false;
+                    state.isSending = false;
                     el.sendBtn.disabled = false;
                     el.typingIndicator.classList.add("hidden");
                     el.chatInput.focus();
                 }
             }
 
-            async function sendUserMessage(text) {
+            function sendUserMessage(text) {
                 const trimmed = String(text || "").trim();
-                if (!trimmed || state.isLoading) return;
+                if (!trimmed || state.isSending) return;
 
-                // הצגת הודעת המשתמש מיד בשיחה (לעולם לא נמחקת בלי תצוגה)
-                state.messages = state.messages.filter(function (m) { return !m.isError; });
-                state.messages.push({ role: "user", text: trimmed });
-                el.chatInput.value = "";
-                autoResizeChatInput();
+                state.messages.push({
+                    role: "user",
+                    text: trimmed
+                });
                 renderMessages();
-
-                await requestBotResponse();
+                requestBotResponse();
             }
 
             // ============================================================
-            // 6. אירועי העלאת יצירה, עריכה והוספת בתים
+            // 6. חילוץ טקסט מתמונות (OCR) ומקבצי TXT
             // ============================================================
-            el.uploadImageBtn.addEventListener("click", function () {
-                el.imageFileInput.click();
-            });
+            function readFileAsBase64(file) {
+                return new Promise(function (resolve, reject) {
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        const result = String(reader.result || "");
+                        const base64 = result.includes(",") ? result.split(",")[1] : result;
+                        resolve({
+                            base64: base64,
+                            mimeType: file.type || "image/jpeg"
+                        });
+                    };
+                    reader.onerror = function () {
+                        reject(new Error("לא ניתן לקרוא את הקובץ"));
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
 
-            el.uploadTxtBtn.addEventListener("click", function () {
-                el.txtFileInput.click();
+            async function extractTextFromImage(file) {
+                const fileData = await readFileAsBase64(file);
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                {
+                                    text: "חלץ בדייקנות את כל הטקסט הספרותי/השיר מהתמונה. שמור בקפידה על שבירת השורות, הרווחים בין הבתים, סימני הפיסוק והניקוד אם קיימים. החזר אך ורק את הטקסט המחולץ, ללא הקדמות וללא הערות."
+                                },
+                                {
+                                    inlineData: {
+                                        mimeType: fileData.mimeType,
+                                        data: fileData.base64
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0.1
+                    }
+                };
+                const extracted = await callGeminiWithBackoff(payload, 3);
+                return extracted.trim();
+            }
+
+            // ============================================================
+            // 7. חיבור מאזינים לאירועים (Event Listeners)
+            // ============================================================
+
+            // מעבר טאבים במובייל
+            el.mobileTabPoem.addEventListener("click", function () { switchMobileTab("poem"); });
+            el.mobileTabChat.addEventListener("click", function () { switchMobileTab("chat"); });
+
+            // העלאת תמונה בשלב הקליטה
+            el.uploadImageBtn.addEventListener("click", function () {
+                el.imageFileInput.value = "";
+                el.imageFileInput.click();
             });
 
             el.imageFileInput.addEventListener("change", async function (e) {
                 const file = e.target.files && e.target.files[0];
-                e.target.value = "";
                 if (!file) return;
-
                 el.setupOcrLoader.classList.remove("hidden");
-                el.loadPoemStartBtn.disabled = true;
                 try {
-                    const extracted = await extractTextFromImage(file);
-                    el.setupPoemTextarea.value = extracted;
-                    state.poemText = extracted;
-                    showToast("הטקסט חולץ מהתמונה! בדקי אותו ולחצי 'טען יצירה והתחל שיחה'");
+                    const text = await extractTextFromImage(file);
+                    const prev = el.setupPoemTextarea.value.trim();
+                    el.setupPoemTextarea.value = prev ? prev + "\n\n" + text : text;
+                    showToast("הטקסט חולץ מהתמונה! בדקי אותו ולחצי 'טען יצירה'");
                 } catch (err) {
-                    showToast("שגיאה בחילוץ הטקסט מהתמונה: " + (err.message || ""));
+                    console.error("OCR error:", err);
+                    showToast("שגיאה בחילוץ הטקסט מהתמונה — בדקי את הגדרות ה-API או הדביקי טקסט ידנית");
                 } finally {
                     el.setupOcrLoader.classList.add("hidden");
-                    el.loadPoemStartBtn.disabled = false;
                 }
             });
 
-            el.txtFileInput.addEventListener("change", async function (e) {
+            // העלאת קובץ TXT
+            el.uploadTxtBtn.addEventListener("click", function () {
+                el.txtFileInput.value = "";
+                el.txtFileInput.click();
+            });
+
+            el.txtFileInput.addEventListener("change", function (e) {
                 const file = e.target.files && e.target.files[0];
-                e.target.value = "";
                 if (!file) return;
-
-                try {
-                    const txt = await file.text();
-                    el.setupPoemTextarea.value = txt.trim();
-                    state.poemText = txt.trim();
-                    showToast("קובץ הטקסט נטען לתיבה בהצלחה");
-                } catch (err) {
-                    showToast("לא ניתן לקרוא את קובץ הטקסט");
-                }
+                const reader = new FileReader();
+                reader.onload = function () {
+                    el.setupPoemTextarea.value = String(reader.result || "").trim();
+                    showToast("קובץ הטקסט נטען בהצלחה");
+                };
+                reader.onerror = function () {
+                    showToast("שגיאה בקריאת קובץ הטקסט");
+                };
+                reader.readAsText(file, "UTF-8");
             });
 
+            // טעינת היצירה והתחלת השיחה
             el.loadPoemStartBtn.addEventListener("click", function () {
                 const text = el.setupPoemTextarea.value.trim();
                 if (!text) {
-                    showToast("אנא הדביקי טקסט או העלי תמונה/קובץ של היצירה קודם");
+                    showToast("יש להדביק או להעלות טקסט של יצירה לפני שמתחילים");
                     el.setupPoemTextarea.focus();
                     return;
                 }
 
                 state.poemText = text;
                 state.author = el.setupAuthorInput.value.trim();
-                state.productRequirement = el.setupProductReqSelect.value;
+                state.productReq = el.setupProductReqSelect.value;
                 state.isPoemLoaded = true;
 
                 renderPoemPanel();
-                showToast("היצירה נטענה! מתחילים את השיחה עם בוט קול");
+                renderProgress();
 
                 if (window.innerWidth < 1024) {
                     switchMobileTab("chat");
                 }
 
-                let startMsg = "מוכנה! העליתי את היצירה.";
+                let introMsg = "מוכנה! העליתי את היצירה.";
                 if (state.author) {
-                    startMsg += " שם היוצר/ת: " + state.author + ".";
+                    introMsg += " שם היוצר/ת: " + state.author + ".";
                 }
-                if (state.productRequirement !== "בחירה חופשית בסיום") {
-                    startMsg += " דרישת המרצה לתוצר הסופי: " + state.productRequirement + ".";
+                if (state.productReq && state.productReq !== "בחירה חופשית בסיום") {
+                    introMsg += " דרישת המרצה לתוצר הסופי: " + state.productReq + ".";
                 }
-                sendUserMessage(startMsg);
+                sendUserMessage(introMsg);
             });
 
-            el.loadedAuthorInput.addEventListener("input", function (e) {
-                state.author = e.target.value;
+            // סנכרון שדות שם יוצר ודרישת תוצר לאחר הטעינה
+            el.loadedAuthorInput.addEventListener("input", function () {
+                state.author = el.loadedAuthorInput.value.trim();
+            });
+            el.loadedProductReqSelect.addEventListener("change", function () {
+                state.productReq = el.loadedProductReqSelect.value;
             });
 
-            el.loadedProductReqSelect.addEventListener("change", function (e) {
-                state.productRequirement = e.target.value;
-                showToast("דרישת התוצר עודכנה");
-            });
-
-            // עריכת טקסט היצירה (Inline Edit)
+            // עריכת טקסט פנימית
             el.editPoemBtn.addEventListener("click", function () {
-                const editorOpen = !el.poemInlineEditor.classList.contains("hidden");
-                if (editorOpen) {
-                    el.poemInlineEditor.classList.add("hidden");
-                    el.poemLinesCard.classList.remove("hidden");
-                } else {
-                    el.inlineEditTextarea.value = state.poemText;
-                    el.poemLinesCard.classList.add("hidden");
-                    el.poemInlineEditor.classList.remove("hidden");
-                    el.inlineEditTextarea.focus();
-                }
+                el.inlineEditTextarea.value = state.poemText;
+                el.poemLinesCard.classList.add("hidden");
+                el.poemInlineEditor.classList.remove("hidden");
+                el.inlineEditTextarea.focus();
             });
 
             el.cancelInlineEditBtn.addEventListener("click", function () {
@@ -1161,122 +1243,104 @@
             });
 
             // מודאל הוספת בית נוסף
-            function openStanzaModal() {
-                el.stanzaTextarea.value = "";
-                el.stanzaOcrLoader.classList.add("hidden");
-                el.stanzaModal.classList.remove("hidden");
-            }
-
             function closeStanzaModal() {
                 el.stanzaModal.classList.add("hidden");
+                el.stanzaTextarea.value = "";
             }
 
-            el.addStanzaBtn.addEventListener("click", openStanzaModal);
+            el.addStanzaBtn.addEventListener("click", function () {
+                el.stanzaTextarea.value = "";
+                el.stanzaModal.classList.remove("hidden");
+                el.stanzaTextarea.focus();
+            });
             el.closeStanzaModalBtn.addEventListener("click", closeStanzaModal);
             el.cancelStanzaBtn.addEventListener("click", closeStanzaModal);
 
             el.stanzaOcrBtn.addEventListener("click", function () {
+                el.stanzaImageInput.value = "";
                 el.stanzaImageInput.click();
             });
 
             el.stanzaImageInput.addEventListener("change", async function (e) {
                 const file = e.target.files && e.target.files[0];
-                e.target.value = "";
                 if (!file) return;
-
                 el.stanzaOcrLoader.classList.remove("hidden");
-                el.saveStanzaBtn.disabled = true;
                 try {
-                    const extracted = await extractTextFromImage(file);
-                    el.stanzaTextarea.value = extracted;
-                    showToast("הבית חולץ בהצלחה מהתמונה");
+                    const text = await extractTextFromImage(file);
+                    el.stanzaTextarea.value = text;
+                    showToast("טקסט הבית חולץ בהצלחה");
                 } catch (err) {
-                    showToast("שגיאה בחילוץ הבית מהתמונה: " + (err.message || ""));
+                    console.error("Stanza OCR error:", err);
+                    showToast("שגיאה בחילוץ הבית מהתמונה");
                 } finally {
                     el.stanzaOcrLoader.classList.add("hidden");
-                    el.saveStanzaBtn.disabled = false;
                 }
             });
 
             el.saveStanzaBtn.addEventListener("click", function () {
                 const stanza = el.stanzaTextarea.value.trim();
                 if (!stanza) {
-                    showToast("אנא הזיני את טקסט הבית הנוסף");
+                    showToast("יש להדביק או לצלם את טקסט הבית");
                     return;
                 }
-                if (state.isPoemLoaded) {
-                    state.poemText = state.poemText.trim() + "\n\n" + stanza;
-                } else {
-                    state.poemText = stanza;
-                    state.isPoemLoaded = true;
-                }
+                state.poemText = state.poemText.trim() + "\n\n" + stanza;
                 renderPoemPanel();
                 closeStanzaModal();
-                showToast("הבית נוסף ליצירה!");
-                sendUserMessage("הוספתי עכשיו את הבית הבא של היצירה:\n" + stanza);
+                showToast("הבית נוסף ליצירה");
+                if (window.innerWidth < 1024) {
+                    switchMobileTab("chat");
+                }
+                sendUserMessage("הוספתי את הבית הבא ליצירה:\n" + stanza);
             });
 
-            // העלאת תמונה מהצ'אט
+            // העלאת תמונה ישירות מהצ'אט
             el.chatImageBtn.addEventListener("click", function () {
+                el.chatImageInput.value = "";
                 el.chatImageInput.click();
             });
 
             el.chatImageInput.addEventListener("change", async function (e) {
                 const file = e.target.files && e.target.files[0];
-                e.target.value = "";
                 if (!file) return;
-
-                if (!state.isPoemLoaded) {
-                    if (window.innerWidth < 1024) switchMobileTab("poem");
-                    el.setupOcrLoader.classList.remove("hidden");
-                    try {
-                        const extracted = await extractTextFromImage(file);
-                        el.setupPoemTextarea.value = extracted;
-                        state.poemText = extracted;
-                        showToast("הטקסט חולץ! לחצי 'טען יצירה והתחל שיחה'");
-                    } catch (err) {
-                        showToast("שגיאה בחילוץ התמונה: " + (err.message || ""));
-                    } finally {
-                        el.setupOcrLoader.classList.add("hidden");
+                showToast("מחלץ טקסט מהתמונה...");
+                try {
+                    const text = await extractTextFromImage(file);
+                    if (!state.isPoemLoaded) {
+                        el.setupPoemTextarea.value = text;
+                        showToast("הטקסט חולץ לפאנל היצירה! לחצי 'טען יצירה והתחל שיחה'");
+                        if (window.innerWidth < 1024) {
+                            switchMobileTab("poem");
+                        }
+                    } else {
+                        state.poemText = state.poemText.trim() + "\n\n" + text;
+                        renderPoemPanel();
+                        sendUserMessage("העליתי בית נוסף מתמונה:\n" + text);
                     }
-                } else {
-                    openStanzaModal();
-                    el.stanzaOcrLoader.classList.remove("hidden");
-                    el.saveStanzaBtn.disabled = true;
-                    try {
-                        const extracted = await extractTextFromImage(file);
-                        el.stanzaTextarea.value = extracted;
-                        showToast("הבית חולץ! לחצי 'הוסף ועדכן את בוט קול'");
-                    } catch (err) {
-                        showToast("שגיאה בחילוץ התמונה: " + (err.message || ""));
-                    } finally {
-                        el.stanzaOcrLoader.classList.add("hidden");
-                        el.saveStanzaBtn.disabled = false;
-                    }
+                } catch (err) {
+                    console.error("Chat image OCR error:", err);
+                    showToast("שגיאה בחילוץ הטקסט מהתמונה");
                 }
             });
 
-            // ============================================================
-            // 7. אירועי צ'אט, מובייל, איפוס וייצוא
-            // ============================================================
+            // שליחת הודעה בצ'אט
             el.chatInput.addEventListener("input", autoResizeChatInput);
-
             el.chatInput.addEventListener("keydown", function (e) {
                 if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    sendUserMessage(el.chatInput.value);
+                    el.chatForm.dispatchEvent(new Event("submit"));
                 }
             });
 
             el.chatForm.addEventListener("submit", function (e) {
                 e.preventDefault();
-                sendUserMessage(el.chatInput.value);
+                const val = el.chatInput.value.trim();
+                if (!val || state.isSending) return;
+                el.chatInput.value = "";
+                autoResizeChatInput();
+                sendUserMessage(val);
             });
 
-            el.mobileTabPoem.addEventListener("click", function () { switchMobileTab("poem"); });
-            el.mobileTabChat.addEventListener("click", function () { switchMobileTab("chat"); });
-
-            // מודאל איפוס (ללא window.confirm)
+            // מודאל איפוס (יצירה חדשה)
             el.resetBtn.addEventListener("click", function () {
                 el.resetModal.classList.remove("hidden");
             });
@@ -1286,48 +1350,49 @@
             el.confirmResetBtn.addEventListener("click", function () {
                 el.resetModal.classList.add("hidden");
                 initSession();
-                showToast("נפתחה שיחה חדשה עם בוט קול");
+                showToast("המערכת אופסה ליצירה חדשה");
             });
 
-            // בניית מסמך ייצוא
+            // מודאל ייצוא ותוצר סופי
             function buildExportDocument() {
-                let doc = "=== תיעוד קריאה פואטית עם בוט קול ===\n";
-                doc += "שם היוצר/ת: " + (state.author.trim() || "לא צוין") + "\n";
-                doc += "דרישת תוצר מהמרצה: " + state.productRequirement + "\n";
-                doc += "שלב שהושג: " + (STAGES[state.currentStage] ? STAGES[state.currentStage].label : "0. קליטת היצירה") + "\n\n";
-
-                if (state.poemText.trim()) {
-                    doc += "--- היצירה ---\n" + state.poemText.trim() + "\n\n";
+                const lines = [];
+                lines.push("=========================================");
+                lines.push("בוט קול — תיעוד ניתוח יצירה ספרותית");
+                lines.push("=========================================");
+                lines.push("יוצר/ת: " + (state.author || "לא צוין"));
+                lines.push("דרישת תוצר: " + state.productReq);
+                lines.push("שלב נוכחי: " + (STAGES[state.currentStage] ? STAGES[state.currentStage].label : ""));
+                lines.push("");
+                if (state.poemText) {
+                    lines.push("--- היצירה ---");
+                    lines.push(state.poemText);
+                    lines.push("");
                 }
-
-                doc += "--- מהלך השיחה והתוצר הסופי ---\n";
+                lines.push("--- מהלך השיחה והניתוח ---");
                 state.messages.forEach(function (m) {
                     if (m.isError) return;
                     const speaker = m.role === "model" ? "בוט קול" : "סטודנטית";
-                    doc += "\n[" + speaker + "]:\n" + m.text + "\n";
+                    lines.push("\n[" + speaker + "]:\n" + m.text);
                 });
-                return doc;
+                return lines.join("\n");
             }
 
             el.exportBtn.addEventListener("click", function () {
-                const text = buildExportDocument();
-                el.exportPreviewText.value = text;
-                el.printSheet.textContent = text;
+                const docText = buildExportDocument();
+                el.exportPreviewText.value = docText;
                 el.exportModal.classList.remove("hidden");
             });
-
             el.closeExportModalBtn.addEventListener("click", function () {
                 el.exportModal.classList.add("hidden");
             });
 
             el.copyExportBtn.addEventListener("click", function () {
-                el.exportPreviewText.focus();
-                el.exportPreviewText.select();
                 try {
+                    el.exportPreviewText.select();
                     document.execCommand("copy");
-                    showToast("הכל הועתק ללוח!");
-                } catch (err) {
-                    showToast("סמני והעתיקי ידנית מהתיבה");
+                    showToast("הטקסט הועתק ללוח!");
+                } catch (e) {
+                    showToast("לא ניתן להעתיק אוטומטית — סמני והעתיקי ידנית");
                 }
             });
 
@@ -1338,10 +1403,10 @@
 
             el.downloadExportBtn.addEventListener("click", function () {
                 const content = el.exportPreviewText.value;
-                const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+                const blob = new Blob(["\uFEFF" + content], { type: "text/plain;charset=utf-8" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
-                const safeAuthor = state.author.trim() ? state.author.trim().replace(/\s+/g, "_") : "יצירה";
+                const safeAuthor = (state.author || "יצירה").replace(/[^א-תa-zA-Z0-9_-]/g, "_");
                 a.href = url;
                 a.download = "בוט_קול_" + safeAuthor + ".txt";
                 document.body.appendChild(a);
@@ -1351,30 +1416,75 @@
                 showToast("קובץ הטקסט הורד למחשב");
             });
 
+            // אירועי מודאל הגדרות API
+            el.apiSettingsBtn.addEventListener("click", openApiSettingsModal);
+            el.closeApiModalBtn.addEventListener("click", closeApiSettingsModal);
+            el.cancelApiModalBtn.addEventListener("click", closeApiSettingsModal);
+
+            el.toggleApiKeyVisibilityBtn.addEventListener("click", function () {
+                if (el.apiKeyInput.type === "password") {
+                    el.apiKeyInput.type = "text";
+                    el.toggleApiKeyVisibilityBtn.textContent = "הסתר";
+                } else {
+                    el.apiKeyInput.type = "password";
+                    el.toggleApiKeyVisibilityBtn.textContent = "הצג";
+                }
+            });
+
+            el.clearApiKeyBtn.addEventListener("click", function () {
+                setCustomApiKey("");
+                el.apiKeyInput.value = "";
+                updateApiKeyIndicator();
+                showToast("החיבור אופס למפתח הסביבה המובנה");
+            });
+
+            el.saveApiKeyBtn.addEventListener("click", function () {
+                const key = el.apiKeyInput.value.trim();
+                setCustomApiKey(key);
+                updateApiKeyIndicator();
+                closeApiSettingsModal();
+                if (key) {
+                    showToast("מפתח ה-API נשמר בהצלחה! ניתן כעת ללחוץ 'נסה שוב' או לשלוח הודעה");
+                } else {
+                    showToast("נעשה שימוש במפתח הסביבה המובנה");
+                }
+            });
+
             // ============================================================
             // 8. אתחול שיחה חדשה
             // ============================================================
             function initSession() {
                 state.poemText = "";
                 state.author = "";
-                state.productRequirement = "בחירה חופשית בסיום";
+                state.productReq = "בחירה חופשית בסיום";
                 state.isPoemLoaded = false;
                 state.currentStage = 0;
                 state.analysisQuestionsCount = 0;
-                state.finalQuestionsCount = 0;
-                state.isLoading = false;
+                state.productQuestionsCount = 0;
+                state.isSending = false;
                 state.messages = [
-                    { role: "model", text: OPENING_MESSAGE, isGreeting: true }
+                    {
+                        role: "model",
+                        isGreeting: true,
+                        text: OPENING_MESSAGE
+                    }
                 ];
 
-                el.poemInlineEditor.classList.add("hidden");
-                el.poemLinesCard.classList.remove("hidden");
+                el.setupPoemTextarea.value = "";
+                el.setupAuthorInput.value = "";
+                el.setupProductReqSelect.value = "בחירה חופשית בסיום";
                 el.chatInput.value = "";
                 autoResizeChatInput();
+                el.poemInlineEditor.classList.add("hidden");
+                el.poemLinesCard.classList.remove("hidden");
 
                 renderProgress();
                 renderPoemPanel();
                 renderMessages();
+                updateApiKeyIndicator();
+                if (window.innerWidth < 1024) {
+                    switchMobileTab("poem");
+                }
             }
 
             // הפעלה ראשונית
