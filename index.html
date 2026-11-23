@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>בוט קול — מאמן לקריאה פואטית וניתוח ספרותי</title>
+    <title>בוט קול — מאמן בקריאה פואטית</title>
     <!-- טעינת Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- גופנים מותאמים לעברית ולשירה -->
@@ -15,22 +15,18 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Heebo', 'Inter', 'sans-serif'],
+                        sans: ['Heebo', 'sans-serif'],
                         serif: ['Frank Ruhl Libre', 'Georgia', 'serif'],
                     },
                     colors: {
                         paper: '#FAF8F5',
                         ink: '#1E293B',
-                        accent: {
-                            50: '#FFFBEB',
-                            100: '#FEF3C7',
-                            600: '#B45309',
-                            700: '#92400E',
-                        },
                         indigoDeep: {
                             50: '#EEF2FF',
                             100: '#E0E7FF',
-                            600: '#4338CA',
+                            200: '#C7D2FE',
+                            500: '#6366F1',
+                            600: '#4F46E5',
                             700: '#3730A3',
                             800: '#312E81',
                             900: '#1E1B4B',
@@ -38,7 +34,7 @@
                     }
                 }
             }
-        }
+        };
     </script>
     <style>
         body {
@@ -72,140 +68,187 @@
         }
         /* שורות שיר לחיצות לציטוט */
         .poem-line {
-            transition: background-color 0.15s ease, transform 0.1s ease;
+            transition: background-color 0.15s ease;
         }
         .poem-line:hover {
             background-color: #FEF3C7;
+        }
+        /* התאמה להדפסה / שמירה כ-PDF */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printContainer, #printContainer * {
+                visibility: visible;
+            }
+            #printContainer {
+                position: absolute;
+                inset: 0;
+                display: block !important;
+                padding: 24px;
+                background: #ffffff;
+                color: #000000;
+                font-family: 'Heebo', sans-serif;
+                white-space: pre-wrap;
+                line-height: 1.7;
+                font-size: 13pt;
+            }
         }
     </style>
 </head>
 <body class="font-sans antialiased h-screen flex flex-col overflow-hidden selection:bg-amber-200 selection:text-slate-900">
 
-    <!-- ================= כותרת עליונה ובר התקדמות ================= -->
+    <!-- אזור מוסתר המשמש להדפסה נקייה כ-PDF -->
+    <div id="printContainer" class="hidden" dir="rtl"></div>
+
+    <!-- ================= כותרת עליונה ופס התקדמות ================= -->
     <header class="bg-white border-b border-stone-200 shadow-sm z-20 shrink-0">
         <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
             <!-- לוגו ושם האפליקציה -->
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-2.5 min-w-0">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigoDeep-800 to-indigoDeep-600 text-amber-300 flex items-center justify-center shadow-sm shrink-0">
-                    <!-- אייקון נוצה/ספר -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
                         <line x1="16" y1="8" x2="2" y2="22"></line>
                         <line x1="17.5" y1="15" x2="9" y2="15"></line>
                     </svg>
                 </div>
-                <div>
+                <div class="truncate">
                     <h1 class="text-lg sm:text-xl font-bold text-slate-900 leading-tight flex items-center gap-2">
-                        בוט קול
-                        <span class="hidden sm:inline-block text-xs font-medium bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">מאמן לקריאה פואטית</span>
+                        <span>בוט קול</span>
+                        <span class="hidden sm:inline-block text-xs font-medium bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">מאמן לקריאה פואטית</span>
                     </h1>
                     <p class="text-xs text-slate-500 hidden sm:block">מלווה פדגוגי לניתוח שירה וטקסטים ספרותיים</p>
                 </div>
             </div>
 
-            <!-- מדד שאלות ושלב נוכחי (דסקטופ) -->
-            <div class="hidden md:flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5">
+            <!-- גלולת סטטוס חיה (דסקטופ) -->
+            <div class="hidden md:flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 shrink-0">
                 <span class="text-xs font-medium text-slate-500">שלב נוכחי:</span>
-                <span id="headerStageBadge" class="text-xs font-bold text-indigoDeep-700 bg-indigoDeep-50 px-2.5 py-0.5 rounded-lg">שלב 0: קליטת היצירה</span>
+                <span id="headerStageBadge" class="text-xs font-bold text-indigoDeep-700 bg-indigoDeep-50 px-2.5 py-0.5 rounded-lg">0. קליטת היצירה</span>
                 <span class="text-stone-300">|</span>
-                <span id="headerCounterBadge" class="text-xs font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-lg" title="מגבלת שאלות לשלבי הניתוח">שאלות ניתוח: 0 / 15</span>
+                <span id="headerCounterBadge" class="text-xs font-semibold text-amber-900 bg-amber-100/70 px-2.5 py-0.5 rounded-lg">שאלות ניתוח: 0 / 15</span>
             </div>
 
             <!-- כפתורי פעולה -->
-            <div class="flex items-center gap-1.5 sm:gap-2">
-                <button id="exportBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors" title="ייצוא סיכום ושיחה">
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button type="button" id="exportBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors" title="ייצוא סיכום ותוצר">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     <span class="hidden sm:inline">ייצוא / תוצר</span>
                 </button>
-                <button id="resetBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors" title="התחלת יצירה חדשה">
+                <button type="button" id="resetBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors" title="התחלת יצירה חדשה">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                     <span class="hidden sm:inline">יצירה חדשה</span>
                 </button>
             </div>
         </div>
 
-        <!-- פס התקדמות של 5 השלבים + סיום -->
+        <!-- סרגל 7 השלבים -->
         <div class="bg-stone-50 border-t border-stone-200 px-3 sm:px-6 py-1.5 overflow-x-auto">
             <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5 min-w-max" id="stageStepper">
-                <!-- מרונדר דינמית ב-JS -->
+                <!-- מרונדר דינמית -->
             </div>
         </div>
 
-        <!-- טאבים למעבר במובייל -->
+        <!-- טאבים במובייל -->
         <div class="flex lg:hidden border-t border-stone-200 bg-white">
-            <button id="mobileTabPoem" class="flex-1 py-2.5 text-sm font-semibold text-slate-600 border-b-2 border-transparent transition-colors flex items-center justify-center gap-1.5">
+            <button type="button" id="mobileTabPoem" class="flex-1 py-2.5 text-sm font-semibold text-slate-600 border-b-2 border-transparent transition-colors flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-                היצירה שלי
+                <span>היצירה בעבודה</span>
                 <span id="mobilePoemDot" class="hidden w-2 h-2 rounded-full bg-emerald-500"></span>
             </button>
-            <button id="mobileTabChat" class="flex-1 py-2.5 text-sm font-semibold text-indigoDeep-700 border-b-2 border-indigoDeep-700 transition-colors flex items-center justify-center gap-1.5">
+            <button type="button" id="mobileTabChat" class="flex-1 py-2.5 text-sm font-semibold text-indigoDeep-700 border-b-2 border-indigoDeep-700 transition-colors flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                השיחה עם בוט קול
+                <span>השיחה עם בוט קול</span>
             </button>
         </div>
     </header>
 
-    <!-- ================= אזור עבודה מרכזי ================= -->
+    <!-- ================= אזור עבודה מרכזי (שתי עמודות בדסקטופ) ================= -->
     <main class="flex-1 flex overflow-hidden max-w-7xl w-full mx-auto">
 
-        <!-- פאנל ימין (ב-RTL): היצירה הספרותית והעלאת טקסט/תמונה -->
-        <section id="poemPanel" class="hidden lg:flex flex-col w-full lg:w-[42%] border-l border-stone-200 bg-white overflow-hidden">
-            
-            <!-- מצב ריק: העלאת יצירה -->
-            <div id="poemEmptyState" class="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center overflow-y-auto">
-                <div class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-4 border border-amber-200/60 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <line x1="10" y1="9" x2="8" y2="9"/>
-                    </svg>
-                </div>
-                <h2 class="text-xl font-bold text-slate-900 mb-2">העלאת יצירה ספרותית</h2>
-                <p class="text-sm text-slate-600 max-w-sm mb-6 leading-relaxed">
-                    העלי תמונה של השיר (אחלץ ממנה את הטקסט אוטומטית), קובץ טקסט, או הדביקי את היצירה ישירות.
-                </p>
+        <!-- פאנל ימין (ב-RTL): היצירה בעבודה -->
+        <section id="poemPanel" class="hidden lg:flex flex-col w-full lg:w-[44%] border-l border-stone-200 bg-white overflow-hidden">
 
-                <!-- אזור גרירה והעלאת קובץ -->
-                <div id="dropZone" class="w-full max-w-md border-2 border-dashed border-stone-300 hover:border-indigoDeep-500 hover:bg-indigoDeep-50/30 rounded-2xl p-6 transition-all cursor-pointer mb-4">
-                    <input type="file" id="fileUploadInput" accept="image/*,.txt" class="hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 mx-auto text-indigoDeep-600 mb-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                    <p class="text-sm font-semibold text-slate-800 mb-1">לחצי לבחירת תמונה או קובץ טקסט</p>
-                    <p class="text-xs text-slate-500">תומך ב-JPG, PNG, WebP (חילוץ טקסט חכם) או TXT</p>
+            <!-- מצב 1: טופס העלאת יצירה חדשה -->
+            <div id="poemUploadState" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+                <div class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4">
+                    <h2 class="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
+                        העלאת יצירה ספרותית
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        העלי תמונה של שיר (אחלץ את הטקסט אוטומטית עם ניקוד ושבירת שורות), קובץ טקסט, או הדביקי את היצירה ישירות למטה.
+                    </p>
                 </div>
 
-                <div class="flex items-center gap-3 w-full max-w-md my-2">
-                    <div class="flex-1 h-px bg-stone-200"></div>
-                    <span class="text-xs text-slate-400 font-medium">או</span>
-                    <div class="flex-1 h-px bg-stone-200"></div>
+                <!-- 2 כפתורי העלאה: תמונה (OCR) וקובץ TXT -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button type="button" id="uploadImageBtn" class="flex items-center justify-center gap-2 py-3 px-3 bg-indigoDeep-50 hover:bg-indigoDeep-100 text-indigoDeep-800 border border-indigoDeep-200 rounded-xl text-xs sm:text-sm font-semibold transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>העלאת תמונה (OCR)</span>
+                    </button>
+                    <button type="button" id="uploadTxtBtn" class="flex items-center justify-center gap-2 py-3 px-3 bg-stone-50 hover:bg-stone-100 text-slate-700 border border-stone-200 rounded-xl text-xs sm:text-sm font-semibold transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span>העלאת קובץ TXT</span>
+                    </button>
+                    <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/webp,image/*" class="hidden">
+                    <input type="file" id="txtFileInput" accept=".txt,text/plain" class="hidden">
                 </div>
 
-                <button id="openPasteModalBtn" class="w-full max-w-md py-3 px-4 bg-indigoDeep-700 hover:bg-indigoDeep-800 text-white font-semibold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 mt-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                    הדבקה / כתיבה של היצירה
+                <!-- מצב טעינה בזמן חילוץ OCR -->
+                <div id="setupOcrLoader" class="hidden bg-indigoDeep-50 border border-indigoDeep-200 rounded-xl p-4 flex items-center gap-3">
+                    <div class="w-6 h-6 border-3 border-indigoDeep-200 border-t-indigoDeep-700 rounded-full animate-spin shrink-0"></div>
+                    <div>
+                        <p class="text-xs sm:text-sm font-bold text-indigoDeep-900">מחלץ את הטקסט מהתמונה...</p>
+                        <p class="text-xs text-indigoDeep-700">שומר על מבנה הבתים, שבירת השורות והניקוד</p>
+                    </div>
+                </div>
+
+                <!-- תיבת הדבקה / תצוגה מקדימה ניתנת לעריכה -->
+                <div>
+                    <label for="setupPoemTextarea" class="block text-xs font-semibold text-slate-700 mb-1">טקסט היצירה (ניתן להדביק ישירות או לערוך לאחר חילוץ מתמונה)</label>
+                    <textarea id="setupPoemTextarea" rows="8" placeholder="הדביקי או כתבי כאן את השיר או הקטע הספרותי..." class="w-full px-3.5 py-3 font-serif text-base leading-relaxed bg-paper/70 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoDeep-500 focus:bg-white"></textarea>
+                </div>
+
+                <!-- שדות מטא-דאטה: שם יוצר/ת + דרישת תוצר מהמרצה -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="setupAuthorInput" class="block text-xs font-semibold text-slate-700 mb-1">שם היוצר/ת (שלב 0)</label>
+                        <input type="text" id="setupAuthorInput" placeholder="למשל: זלדה, רחל, ביאליק..." class="w-full px-3 py-2 text-sm bg-white border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoDeep-500">
+                    </div>
+                    <div>
+                        <label for="setupProductReqSelect" class="block text-xs font-semibold text-slate-700 mb-1">דרישת תוצר מהמרצה</label>
+                        <select id="setupProductReqSelect" class="w-full px-3 py-2 text-sm bg-white border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoDeep-500">
+                            <option value="בחירה חופשית בסיום">בחירה חופשית בסיום</option>
+                            <option value="תוצר 1: קטע מסכם">תוצר 1: קטע מסכם</option>
+                            <option value="תוצר 2: רפלקציה">תוצר 2: רפלקציה</option>
+                            <option value="תוצר 3: כתיבת טקסט פואטי מתכתב">תוצר 3: כתיבת טקסט פואטי מתכתב</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- כפתור ראשי לטעינה והתחלת השיחה -->
+                <button type="button" id="loadPoemStartBtn" class="w-full py-3 px-4 bg-indigoDeep-700 hover:bg-indigoDeep-800 text-white font-bold text-sm sm:text-base rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <span>טען יצירה והתחל שיחה</span>
                 </button>
             </div>
 
-            <!-- מצב טעון: תצוגת היצירה -->
+            <!-- מצב 2: היצירה טעונה בתצוגה ספרותית -->
             <div id="poemLoadedState" class="hidden flex-1 flex flex-col overflow-hidden">
-                <!-- פרטי היצירה ודרישת מרצה -->
-                <div class="p-4 bg-stone-50 border-b border-stone-200 space-y-2.5 shrink-0">
+                <!-- סרגל פרטי היצירה וכפתורי עריכה / הוספת בית -->
+                <div class="p-3.5 sm:p-4 bg-stone-50 border-b border-stone-200 space-y-2.5 shrink-0">
                     <div class="flex items-center justify-between gap-2">
                         <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-amber-600"></span>
-                            היצירה בעבודה
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
+                            <span>היצירה בעבודה</span>
                         </h2>
                         <div class="flex items-center gap-1.5">
-                            <button id="addStanzaBtn" class="text-xs font-medium text-indigoDeep-700 bg-indigoDeep-50 hover:bg-indigoDeep-100 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1" title="העלאת בית נוסף מתמונה או מטקסט">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                הוסף בית
+                            <button type="button" id="addStanzaBtn" class="text-xs font-semibold text-indigoDeep-700 bg-indigoDeep-50 hover:bg-indigoDeep-100 border border-indigoDeep-200/70 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                                <span>+ הוסף בית</span>
                             </button>
-                            <button id="editPoemBtn" class="text-xs font-medium text-slate-600 bg-white border border-stone-200 hover:bg-stone-100 px-2.5 py-1.5 rounded-lg transition-colors">
+                            <button type="button" id="toggleEditPoemBtn" class="text-xs font-medium text-slate-700 bg-white border border-stone-300 hover:bg-stone-100 px-2.5 py-1.5 rounded-lg transition-colors">
                                 עריכה
                             </button>
                         </div>
@@ -213,30 +256,41 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
-                            <label for="authorInput" class="block text-[11px] font-medium text-slate-500 mb-0.5">שם היוצר/ת (שלב 0)</label>
-                            <input type="text" id="authorInput" placeholder="למשל: זלדה, רחל, יהודה עמיחי..." class="w-full text-xs px-2.5 py-1.5 bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigoDeep-500">
+                            <label for="loadedAuthorInput" class="block text-[11px] font-medium text-slate-500 mb-0.5">שם היוצר/ת (שלב 0)</label>
+                            <input type="text" id="loadedAuthorInput" placeholder="שם המשורר/ת..." class="w-full text-xs px-2.5 py-1.5 bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigoDeep-500">
                         </div>
                         <div>
-                            <label for="productReqSelect" class="block text-[11px] font-medium text-slate-500 mb-0.5">דרישת תוצר מהמרצה</label>
-                            <select id="productReqSelect" class="w-full text-xs px-2.5 py-1.5 bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigoDeep-500">
-                                <option value="בחירה חופשית של הסטודנטית בסיום">בחירה חופשית בסיום</option>
-                                <option value="תוצר 1: קטע מסכם של הניתוח (דרישת מרצה)">תוצר 1: קטע מסכם</option>
-                                <option value="תוצר 2: רפלקציה על תהליך הלמידה (דרישת מרצה)">תוצר 2: רפלקציה</option>
-                                <option value="תוצר 3: כתיבת טקסט פואטי מתכתב (דרישת מרצה)">תוצר 3: טקסט פואטי מתכתב</option>
+                            <label for="loadedProductReqSelect" class="block text-[11px] font-medium text-slate-500 mb-0.5">דרישת תוצר מהמרצה</label>
+                            <select id="loadedProductReqSelect" class="w-full text-xs px-2.5 py-1.5 bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigoDeep-500">
+                                <option value="בחירה חופשית בסיום">בחירה חופשית בסיום</option>
+                                <option value="תוצר 1: קטע מסכם">תוצר 1: קטע מסכם</option>
+                                <option value="תוצר 2: רפלקציה">תוצר 2: רפלקציה</option>
+                                <option value="תוצר 3: כתיבת טקסט פואטי מתכתב">תוצר 3: כתיבת טקסט פואטי מתכתב</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- תצוגת השיר עצמו -->
-                <div class="flex-1 overflow-y-auto p-5 sm:p-7 bg-paper/70">
-                    <div class="bg-white border border-stone-200/80 rounded-2xl p-5 sm:p-6 shadow-sm">
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-stone-100">
-                            <span class="text-xs text-slate-400">💡 לחצי על כל שורה כדי לצטט אותה לשיחה</span>
-                            <span id="poemStats" class="text-[11px] font-medium text-stone-400"></span>
+                <!-- תצוגת השיר או מצב עריכה פנימי -->
+                <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-paper/70">
+                    <!-- כרטיס קריאה עם שורות ממוספרות -->
+                    <div id="poemReaderCard" class="bg-white border border-stone-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-stone-100 gap-2">
+                            <span class="text-xs text-slate-500">💡 לחצי על כל שורה כדי לצטט אותה לשיחה</span>
+                            <span id="poemLineStats" class="text-[11px] font-medium text-stone-400 shrink-0"></span>
                         </div>
-                        <div id="poemDisplayContent" class="font-serif text-lg sm:text-xl leading-relaxed text-slate-900 space-y-1">
-                            <!-- השורות מרונדרות כאן -->
+                        <div id="poemLinesContainer" class="font-serif text-lg sm:text-xl leading-relaxed text-slate-900 space-y-1">
+                            <!-- מרונדר דינמית -->
+                        </div>
+                    </div>
+
+                    <!-- תיבת עריכה פנימית (Inline Edit) -->
+                    <div id="poemInlineEditor" class="hidden bg-white border border-indigoDeep-200 rounded-2xl p-4 shadow-sm space-y-3">
+                        <label for="inlineEditTextarea" class="block text-xs font-bold text-indigoDeep-800">עריכת טקסט היצירה</label>
+                        <textarea id="inlineEditTextarea" rows="12" class="w-full p-3.5 font-serif text-base leading-relaxed bg-paper border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoDeep-500"></textarea>
+                        <div class="flex items-center justify-end gap-2">
+                            <button type="button" id="cancelInlineEditBtn" class="px-3.5 py-2 text-xs font-medium text-slate-600 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
+                            <button type="button" id="saveInlineEditBtn" class="px-4 py-2 text-xs font-bold text-white bg-indigoDeep-700 hover:bg-indigoDeep-800 rounded-xl transition-colors">שמירת שינויים</button>
                         </div>
                     </div>
                 </div>
@@ -245,13 +299,13 @@
 
         <!-- פאנל שמאל (ב-RTL): הצ'אט עם בוט קול -->
         <section id="chatPanel" class="flex-1 flex flex-col bg-paper overflow-hidden">
-            
-            <!-- הודעות הצ'אט -->
+
+            <!-- רשימת הודעות -->
             <div id="chatMessages" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-                <!-- הודעות מתווספות כאן דינמית -->
+                <!-- מרונדר דינמית -->
             </div>
 
-            <!-- אינדיקטור הקלדה -->
+            <!-- אנימציית הקלדה -->
             <div id="typingIndicator" class="hidden px-4 sm:px-6 pb-2">
                 <div class="inline-flex items-center gap-2 bg-white border border-stone-200 rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm">
                     <span class="text-xs font-medium text-slate-500">בוט קול חושב</span>
@@ -263,25 +317,21 @@
                 </div>
             </div>
 
-            <!-- כפתורי תגובה מהירה (מופיעים בהקשר מתאים) -->
-            <div id="quickActionsBar" class="px-4 sm:px-6 pb-2 flex flex-wrap gap-2">
-                <!-- מתמלא דינמית -->
-            </div>
-
             <!-- שורת קלט להודעות -->
             <div class="p-3 sm:p-4 bg-white border-t border-stone-200 shrink-0">
                 <form id="chatForm" class="max-w-4xl mx-auto flex items-end gap-2">
-                    <!-- כפתור העלאת תמונה מהירה (לשיר או לבית הבא) -->
-                    <button type="button" id="chatUploadBtn" class="p-3 text-slate-500 hover:text-indigoDeep-700 hover:bg-indigoDeep-50 rounded-xl transition-colors shrink-0" title="העלאת תמונה של שיר או בית נוסף">
+                    <!-- העלאת תמונה של בית ישירות מהצ'אט (OCR) -->
+                    <button type="button" id="chatImageUploadBtn" class="p-3 text-slate-500 hover:text-indigoDeep-700 hover:bg-indigoDeep-50 rounded-xl transition-colors shrink-0" title="העלאת תמונה של שיר או בית נוסף (OCR)">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                             <circle cx="8.5" cy="8.5" r="1.5"/>
                             <polyline points="21 15 16 10 5 21"/>
                         </svg>
                     </button>
+                    <input type="file" id="chatImageInput" accept="image/jpeg,image/png,image/webp,image/*" class="hidden">
 
-                    <!-- תיבת טקסט -->
-                    <div class="flex-1 relative">
+                    <!-- תיבת הקלדה -->
+                    <div class="flex-1">
                         <textarea id="chatInput" rows="1" placeholder="כתבי את תשובתך לבוט קול..." class="w-full resize-none bg-stone-50 border border-stone-300 focus:border-indigoDeep-500 focus:bg-white focus:ring-2 focus:ring-indigoDeep-500/20 rounded-xl px-4 py-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none max-h-36 leading-snug"></textarea>
                     </div>
 
@@ -295,96 +345,85 @@
                 </form>
                 <div class="max-w-4xl mx-auto mt-1.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
                     <span>Enter לשליחה • Shift+Enter לשורה חדשה</span>
-                    <span id="mobileCounterText" class="md:hidden font-medium text-amber-700">שאלות ניתוח: 0 / 15</span>
+                    <span id="mobileCounterBadge" class="md:hidden font-semibold text-amber-800">שאלות ניתוח: 0 / 15</span>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- ================= מודאל עריכה / חילוץ טקסט (OCR) ================= -->
-    <div id="textModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200">
+    <!-- ================= מודאל הוספת בית נוסף ================= -->
+    <div id="stanzaModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200">
             <div class="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-                <h3 id="textModalTitle" class="text-base font-bold text-slate-900">הדבקת / עריכת יצירה</h3>
-                <button id="closeTextModalBtn" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-stone-200/60">
+                <h3 class="text-base font-bold text-slate-900">הוספת בית נוסף ליצירה</h3>
+                <button type="button" id="closeStanzaModalBtn" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-stone-200/60">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-
             <div class="p-5 overflow-y-auto space-y-4">
-                <!-- מצב טעינת OCR -->
-                <div id="ocrLoadingBox" class="hidden py-10 flex flex-col items-center justify-center text-center">
-                    <div class="w-10 h-10 border-4 border-indigoDeep-200 border-t-indigoDeep-700 rounded-full animate-spin mb-3"></div>
-                    <p class="text-sm font-semibold text-slate-800">מחלץ את הטקסט מהתמונה...</p>
-                    <p class="text-xs text-slate-500 mt-1">שומר על מבנה הבתים, שבירת השורות והניקוד</p>
+                <button type="button" id="stanzaOcrBtn" class="w-full py-2.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span>חילוץ הבית הבא מתוך תמונה (OCR)</span>
+                </button>
+                <input type="file" id="stanzaImageInput" accept="image/jpeg,image/png,image/webp,image/*" class="hidden">
+
+                <div id="stanzaOcrLoader" class="hidden bg-indigoDeep-50 border border-indigoDeep-200 rounded-xl p-3 flex items-center gap-3">
+                    <div class="w-5 h-5 border-2 border-indigoDeep-200 border-t-indigoDeep-700 rounded-full animate-spin shrink-0"></div>
+                    <span class="text-xs font-semibold text-indigoDeep-900">מחלץ את הטקסט מהתמונה...</span>
                 </div>
 
-                <!-- טופס הטקסט -->
-                <div id="modalFormFields" class="space-y-4">
-                    <!-- העלאת תמונה ישירות מתוך המודאל (שימושי להוספת בית) -->
-                    <div id="modalQuickUploadWrapper" class="hidden">
-                        <label class="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-semibold cursor-pointer transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                            חילוץ הבית הבא מתוך תמונה (OCR)
-                            <input type="file" id="modalStanzaImageInput" accept="image/*" class="hidden">
-                        </label>
-                    </div>
-
-                    <div id="modalAuthorGroup">
-                        <label for="modalAuthorInput" class="block text-xs font-semibold text-slate-700 mb-1">מי כתב את היצירה? (אופציונלי כעת — בוט קול ישאל גם בשיחה)</label>
-                        <input type="text" id="modalAuthorInput" placeholder="שם המשורר/ת או הסופר/ת..." class="w-full px-3.5 py-2 text-sm border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoDeep-500">
-                    </div>
-
-                    <div>
-                        <label for="modalPoemTextarea" class="block text-xs font-semibold text-slate-700 mb-1">טקסט היצירה (ניתן לערוך ולתקן לפני האישור)</label>
-                        <textarea id="modalPoemTextarea" rows="10" placeholder="הדביקי או כתבי כאן את השיר..." class="w-full px-4 py-3 font-serif text-base leading-relaxed border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoDeep-500 bg-paper/50"></textarea>
-                    </div>
+                <div>
+                    <label for="stanzaTextarea" class="block text-xs font-semibold text-slate-700 mb-1">טקסט הבית הנוסף</label>
+                    <textarea id="stanzaTextarea" rows="7" placeholder="הדביקי כאן את הבית הבא של השיר..." class="w-full px-3.5 py-3 font-serif text-base leading-relaxed bg-paper border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigoDeep-500"></textarea>
                 </div>
             </div>
-
             <div class="px-5 py-3.5 border-t border-stone-200 bg-stone-50 flex items-center justify-end gap-2">
-                <button id="cancelTextModalBtn" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
-                <button id="saveTextModalBtn" class="px-5 py-2 text-sm font-semibold text-white bg-indigoDeep-700 hover:bg-indigoDeep-800 rounded-xl shadow-sm transition-colors">אישור ושמירה</button>
+                <button type="button" id="cancelStanzaBtn" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
+                <button type="button" id="saveStanzaBtn" class="px-5 py-2 text-sm font-bold text-white bg-indigoDeep-700 hover:bg-indigoDeep-800 rounded-xl shadow-sm transition-colors">הוסף ועדכן את בוט קול</button>
             </div>
         </div>
     </div>
 
-    <!-- ================= מודאל אישור התחלה מחדש ================= -->
+    <!-- ================= מודאל אישור איפוס (יצירה חדשה) ================= -->
     <div id="resetModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 border border-stone-200 text-center">
             <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
             </div>
             <h3 class="text-lg font-bold text-slate-900 mb-1">להתחיל יצירה חדשה?</h3>
-            <p class="text-sm text-slate-600 mb-5">השיחה הנוכחית והיצירה שהועלתה יימחקו כדי לפתוח מסע חדש עם בוט קול.</p>
+            <p class="text-sm text-slate-600 mb-5">השיחה הנוכחית והיצירה שהועלתה יתאפסו כדי לפתוח מסע חדש עם בוט קול.</p>
             <div class="flex items-center justify-center gap-2.5">
-                <button id="cancelResetBtn" class="flex-1 py-2.5 px-4 text-sm font-medium text-slate-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
-                <button id="confirmResetBtn" class="flex-1 py-2.5 px-4 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors">כן, התחל מחדש</button>
+                <button type="button" id="cancelResetBtn" class="flex-1 py-2.5 px-4 text-sm font-medium text-slate-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors">ביטול</button>
+                <button type="button" id="confirmResetBtn" class="flex-1 py-2.5 px-4 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors">כן, התחל מחדש</button>
             </div>
         </div>
     </div>
 
-    <!-- ================= מודאל ייצוא תוצר ושיחה ================= -->
+    <!-- ================= מודאל ייצוא / תוצר ================= -->
     <div id="exportModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-stone-200">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden border border-stone-200">
             <div class="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-                <h3 class="text-base font-bold text-slate-900">ייצוא תוצר וסיכום השיחה</h3>
-                <button id="closeExportModalBtn" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-stone-200/60">
+                <h3 class="text-base font-bold text-slate-900">ייצוא סיכום, שיחה ותוצר סופי</h3>
+                <button type="button" id="closeExportModalBtn" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-stone-200/60">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
             <div class="p-5 overflow-y-auto flex-1">
-                <p class="text-xs text-slate-500 mb-2">להלן תיעוד מלא של היצירה והשיחה שלך עם בוט קול (כולל התוצר הסופי בסוף):</p>
-                <textarea id="exportPreviewText" readonly rows="12" class="w-full p-4 text-sm bg-stone-50 border border-stone-200 rounded-xl font-sans leading-relaxed text-slate-800 focus:outline-none"></textarea>
+                <p class="text-xs text-slate-500 mb-2">תיעוד מסודר של היצירה, מהלך הניתוח עם בוט קול והתוצר הסופי:</p>
+                <textarea id="exportPreviewText" readonly rows="13" class="w-full p-4 text-sm bg-stone-50 border border-stone-200 rounded-xl font-sans leading-relaxed text-slate-800 focus:outline-none"></textarea>
             </div>
             <div class="px-5 py-3.5 border-t border-stone-200 bg-stone-50 flex flex-wrap items-center justify-end gap-2">
-                <button id="copyExportBtn" class="px-4 py-2 text-sm font-medium text-indigoDeep-700 bg-indigoDeep-50 hover:bg-indigoDeep-100 rounded-xl transition-colors flex items-center gap-1.5">
+                <button type="button" id="copyExportBtn" class="px-4 py-2 text-sm font-medium text-indigoDeep-700 bg-indigoDeep-50 hover:bg-indigoDeep-100 rounded-xl transition-colors flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    העתקה ללוח
+                    <span>העתק הכל</span>
                 </button>
-                <button id="downloadExportBtn" class="px-4 py-2 text-sm font-semibold text-white bg-indigoDeep-700 hover:bg-indigoDeep-800 rounded-xl shadow-sm transition-colors flex items-center gap-1.5">
+                <button type="button" id="printExportBtn" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-stone-300 hover:bg-stone-100 rounded-xl transition-colors flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    <span>הדפסה / שמירה כ-PDF</span>
+                </button>
+                <button type="button" id="downloadExportBtn" class="px-4 py-2 text-sm font-bold text-white bg-indigoDeep-700 hover:bg-indigoDeep-800 rounded-xl shadow-sm transition-colors flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    הורדה כקובץ TXT
+                    <span>הורד קובץ טקסט</span>
                 </button>
             </div>
         </div>
@@ -395,930 +434,940 @@
         הודעה
     </div>
 
-    <!-- ================= לוגיקת האפליקציה וחיבור ל-Gemini API ================= -->
+    <!-- ================= לוגיקת האפליקציה (JavaScript סטנדרטי נקי) ================= -->
     <script>
-        // ==========================================
-        // קבועים והגדרות מערכת
-        // ==========================================
-        const apiKey = ""; // יסופק אוטומטית בזמן ריצה
-        const GEMINI_MODEL = "gemini-3-flash-preview";
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+        document.addEventListener("DOMContentLoaded", function () {
+            // ==========================================
+            // 1. הגדרות API וקבועים
+            // ==========================================
+            const apiKey = "";
+            const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
+            const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + apiKey;
 
-        const OPENING_MESSAGE = "שלום, קוראים לי בוט קול ואני המלווה שלך לקריאת טקסטים ספרותיים. בואי נצא יחד למסע קסום בתוך היצירה. מוכנה?";
+            const OPENING_MESSAGE = "שלום, קוראים לי בוט קול ואני המלווה שלך לקריאת טקסטים ספרותיים. בואי נצא יחד למסע קסום בתוך היצירה. מוכנה?";
 
-        const STAGES = [
-            { id: "0", label: "0. קליטת היצירה" },
-            { id: "1", label: "1. תצפית ומבנה" },
-            { id: "2", label: "2. פרשנות ראשונית" },
-            { id: "3", label: "3. הקשר ומושגים" },
-            { id: "4", label: "4. ביקורת ויצירה" },
-            { id: "5", label: "5. רובד תיאורטי" },
-            { id: "FINAL", label: "תוצר סופי" }
-        ];
+            const STAGES = [
+                { id: 0, label: "0. קליטת היצירה" },
+                { id: 1, label: "1. תצפית ומבנה" },
+                { id: 2, label: "2. פרשנות ראשונית" },
+                { id: 3, label: "3. הקשר ומושגים" },
+                { id: 4, label: "4. ביקורת ויצירה" },
+                { id: 5, label: "5. רובד תיאורטי" },
+                { id: 6, label: "תוצר סופי" }
+            ];
 
-        // פרומפט המערכת המדויק של בוט קול
-        const BASE_SYSTEM_PROMPT = `# תפקיד וזהות
-שמך הוא **בוט קול** – מאמן מנוסה ומלווה פדגוגי בקריאת שירה עברית וניתוח יצירות ספרותיות. תפקידך להוביל סטודנטיות וסטודנטים בתהליך חשיבה עצמאי, מעמיק, ענייני ומהנה. 
-המטרה שלך אינה ללמד את "הפירוש הנכון" של היצירה, אלא ללמד את הסטודנטית **איך לקרוא ולנתח שירה בעצמה**.
-
----
-
-# הודעת פתיחה (כבר נשלחה בתחילת השיחה)
-השיחה נפתחה בנוסח:
-"שלום, קוראים לי בוט קול ואני המלווה שלך לקריאת טקסטים ספרותיים. בואי נצא יחד למסע קסום בתוך היצירה. מוכנה?"
-
----
+            // פרומפט מערכת מלא ומדויק עבור בוט קול
+            const BASE_SYSTEM_PROMPT = `# תפקיד וזהות
+שמך הוא **בוט קול** – מאמן מנוסה ומלווה סוקרטי בקריאת שירה עברית וניתוח יצירות ספרותיות.
+מטרתך ללמד את הסטודנטית **איך לקרוא ולנתח שירה בעצמה**, ולא להרצות או לתת "פירוש נכון".
 
 # עקרונות יסוד וכללי ברזל
-
 1. **מלווה סוקרטי, לא מרצה:**
-   - כ-80% מהתגובות שלך יהיו **שאלות מנחות**, וכ-20% יהיו הכוונה, מידע ממוקד או משוב.
+   - כ-80% מהתגובות שלך הן **שאלות מנחות**, וכ-20% הן הכוונה, מידע ממוקד או משוב.
    - לעולם אל תיתן "פירוש נכון" אחד ואל תדבר במקום הסטודנטית.
-   - הסבר בקצרה *למה* אתה שואל (למשל: "נעבור למבנה, כדי להבין איך הצורה משרתת את המסר").
-   - בקש תמיד **ביסוס מהטקסט** (שורה, מילה, דימוי).
+   - הסבר בקצרה *למה* אתה שואל (למשל: "נעבור למבנה כדי להבין איך הצורה משרתת את המסר").
+   - בקש תמיד **ביסוס מהטקסט** (שורה, מילה או דימוי).
 
-2. **דיוק עובדתי ואמינות (אפס המצאות):**
-   - הסתמך אך ורק על עובדות, הגדרות ספרותיות מדויקות ומקורות מהימנים. אל תמציא פרטים ביוגרפיים, הקשרים היסטוריים או הגדרות של מושגים. אם אינך בטוח בפרט חיצוני – אל תציין אותו.
+2. **דיוק עובדתי ואפס המצאות:**
+   - הסתמך אך ורק על עובדות מאומתות והגדרות ספרותיות מדויקות. לעולם אל תמציא פרטים ביוגרפיים או היסטוריים. אם אינך בטוח – אל תציין.
 
 3. **משוב אותנטי ומאוזן (ללא חנופת יתר):**
-   - הימנע ממחמאות מוגזמות או אוטומטיות על כל תשובה. תן משוב ענייני, מדויק ואמיתי.
-   - אם הסטודנטית כותבת דבר שגוי או לא מבוסס – אל תאמר לה שהיא צודקת, אך גם אל תבטל אותה במילים כמו "טעות" או "לא נכון". במקום זאת, פרק את תשובתה ובדוק יחד איתה: "מעניין איך הגעת לזה – איזו שורה בטקסט תומכת בכך?" או הפנה אותה לשורה שסותרת את דבריה.
+   - אל תחמיא באופן מוגזם על כל תשובה. תן הערה עניינית ואמיתית.
+   - אם הסטודנטית כותבת דבר שגוי או לא מבוסס – אל תאמר לה שהיא צודקת, אך גם אל תאמר "טעות" או "לא נכון". פרק את תשובתה ובדוק יחד איתה: "מעניין איך הגעת לזה – איזו שורה בטקסט תומכת בכך?" או הפנה אותה לשורה שסותרת זאת.
 
 4. **קצב ענייני, קצר וממוקד:**
    - שמור על תשובות קצרות ובהירות כדי לא להתיש.
-   - התמקד בנושאים ובצירים המרכזיים של היצירה, ולא בניתוח מילה-אחר-מילה.
-   - התאם את מורכבות השאלות לרמת הסטודנטית (פשט כשקשה, אתגר כשקל).
-   - **טון:** חם אך מקצועי, סבלני ולא מתנשא. הימנע ממילים מקטינות כמו "למעשה", "בעצם", "פשוט" או "ברור ש...".
-
----
+   - התמקד בצירים המרכזיים ובמבנה היצירה ולא בניתוח מילה-אחר-מילה.
+   - התאם את רמת השאלות לסטודנטית (פשט כשקשה, אתגר כשקל).
+   - **טון:** חם, מקצועי, סבלני ולא מתנשא. הימנע מ"למעשה", "בעצם", "פשוט" או "ברור ש...".
 
 # מהלך העבודה והשלבים
+- **שלב 0 (קליטת היצירה):**
+  לפני תחילת הניתוח, ודא שיש בידיך את היצירה. בקש מהסטודנטית לציין **מי כתב את היצירה** (אם טרם צוין) וברר אם יש **דרישת תוצר ספציפית מהמרצה** (אם לא הוגדרה). אם השיר בנוי ממספר בתים, עדכן שניתן להתקדם בית-אחר-בית ולהעלות את הבית הבא כטקסט או כתמונה.
 
-## שלב 0: קליטת היצירה (שלב מקדים – חובה לפני תחילת הניתוח)
-1. אם הסטודנטית עדיין לא העלתה את היצירה – הזמן אותה להעלות אותה (כטקסט או תמונה).
-2. ברגע שהיצירה הועלתה, אל תתחיל מיד בשאלות ניתוח!
-3. בקש ממנה לציין **מי כתב את היצירה** (אם שם היוצר עדיין לא צוין).
-4. שאל אם יש **דרישה ספציפית מהמרצה** לגבי התוצר הסופי (אם טרם הוגדרה; אם אין, היא תבחר בעצמה בסיום).
-5. **שיר מרובה בתים:** אם היצירה ארוכה ומחולקת לבתים, עדכן אותה שניתן להתקדם בית-אחר-בית, ובכל מעבר לבית חדש בקש ממנה להעלות את הבית הבא (כטקסט או תמונה) באמצעות כפתור "הוסף בית" כדי שתוכל להתייחס אליו בדיוק מרבי.
+- **שלבים 1 עד 5 (מגבלה קשיחה: מקסימום 15 שאלות סך הכל ל-5 השלבים יחד — כ-2–3 שאלות ממוקדות לשלב):**
+  * **שלב 1 – תצפית ומבנה:** מה *יש* בטקסט? מילים בולטות, חזרות, דימויים, התרחשות בסיסית, **והתייחסות מפורשת למבנה השיר** (בתים, אורך שורות, פיסוק, חריזה).
+  * **שלב 2 – פרשנות ראשונית:** משמעות, רגש, אווירה ובחירות המשורר.
+  * **שלב 3 – הקשר, מושגים ספרותיים והעמקה:** שלב מושגים רלוונטיים (*מטאפורה, דימוי, האנשה, סמל, מטונימיה, אנאפורה, אפיפורה, גלישה, מצלול, חריזה*): בדוק אם היא מכירה ← הסבר בקצרה ובמדויק אם לא ← בקש דוגמה מהטקסט. חבר בין צורה לתוכן, אינטרטקסטואליות, ורקע היסטורי/ביוגרפי רלוונטי (שאל קודם מה היא יודעת, ספק 2–3 משפטים מאומתים מקסימום, והחזר לטקסט).
+  * **שלב 4 – ביקורת ויצירה:** הערכת בחירות פואטיות ("האם זה עובד עבורך?", "מה היית משנה?").
+  * **שלב 5 – רובד תיאורטי:** קריאת השיר דרך עדשה תיאורטית מתאימה (פוליטית, מגדרית, חברתית או פסיכולוגית).
 
----
+- **שלב 6 – תוצר סופי (רק לאחר מיצוי 5 השלבים):**
+  הצע לסטודנטית לבחור אחד מ-3 התוצרים (אלא אם הוגדרה דרישת מרצה בשלב 0):
+  1. **קטע מסכם של הניתוח:** בנה יחד איתה ב-**5 שאלות בלבד** (שאלה לכל שלב). אל תכתוב במקומה; רק לאחר שענתה על 5 השאלות שאל אם תרצה לקבל את הקטע השלם והערוך.
+  2. **רפלקציה על תהליך הלמידה:** הנחה ב-**5 שאלות רפלקטיביות** על התהליך שעברה.
+  3. **כתיבת טקסט פואטי מתכתב:** הנחה ב-**5 שאלות** לבניית טקסט פואטי המתכתב עם היצירה.
 
-## שלבי הניתוח (רמות 1 עד 5)
-⚠️ **מגבלת אורך קשיחה:** כל תהליך הניתוח – מתחילת שלב 1 ועד סיום שלב 5 (לפני שלב התוצר) – יכלול **מקסימום 15 שאלות סך הכל** (כ-2 עד 3 שאלות ממוקדות לכל שלב). עבור בין השלבים בצורה חלקה ועניינית ברגע שהשלב מוצה.
+# תרחישים מיוחדים
+- "אני לא מבינה כלום" ← אל תסביר את השיר; התחל בקטן ממילה אחת או מהרגש הכללי.
+- "מה הפירוש הנכון?" ← אין פירוש אחד; חפש יחד במה הטקסט תומך.
+- סטודנטית חזקה ומהירה ← התקדם מהר יותר ליחסי צורה-תוכן, ביקורת ורובד תיאורטי.
 
-### שלב 1: תצפית (Observation)
-- **מיקוד:** מה *יש* בטקסט? מילים בולטות, חזרות, דימויים, התרחשות בסיסית, **והתייחסות מפורשת למבנה השיר** (חלוקה לבתים, אורך שורות, פיסוק, חריזה).
+# הנחיה טכנית חובה (לעדכון סרגל ההתקדמות)
+בסוף כל תגובה שלך, בשורה האחרונה, כתוב אך ורק את תגית השלב הנוכחי (0 עד 6) בפורמט המדויק:
+[[STAGE:0]] או [[STAGE:1]] או [[STAGE:2]] או [[STAGE:3]] או [[STAGE:4]] או [[STAGE:5]] או [[STAGE:6]]
+אל תסביר תגית זו — האפליקציה מסירה אותה אוטומטית לפני ההצגה לסטודנטית.`;
 
-### שלב 2: פרשנות ראשונית (Interpretation)
-- **מיקוד:** משמעות, רגש ובחירות המשורר.
+            // ==========================================
+            // 2. מצב האפליקציה (State)
+            // ==========================================
+            const state = {
+                poemText: "",
+                author: "",
+                productRequirement: "בחירה חופשית בסיום",
+                isPoemLoaded: false,
+                currentStage: 0,
+                analysisQuestionsCount: 0,
+                finalQuestionsCount: 0,
+                messages: [],
+                isLoading: false
+            };
 
-### שלב 3: הקשר, מושגים והעמקה (Context & Depth)
-- **מושגים ספרותיים:** שלב בהתאם לרלוונטיות לטקסט מושגים כגון: *מטאפורה, דימוי, האנשה, סמל, מטונימיה, אנאפורה, אפיפורה, גלישה (פסיחה), מצלול, חריזה*.
-  - *כלל עבודה עם מושג:* בדוק אם הסטודנטית מכירה אותו ← אם לא, הסבר בקצרה ובמדויק ← בקש ממנה לאתר דוגמה בטקסט.
-- **יחס צורה-תוכן ואינטרטקסט:** איך המבנה והאמצעים האמנותיים משרתים את המסר? האם יש רמז למקור אחר?
-- **רקע היסטורי/ביוגרפי:** אם הדבר רלוונטי ליצירה, ברר קודם מה הסטודנטית יודעת, ספק מידע קצר ומבוסס (2–3 משפטים), והחזר מיד לטקסט.
+            // ==========================================
+            // 3. איסוף רכיבי DOM
+            // ==========================================
+            const el = {
+                printContainer: document.getElementById("printContainer"),
+                headerStageBadge: document.getElementById("headerStageBadge"),
+                headerCounterBadge: document.getElementById("headerCounterBadge"),
+                mobileCounterBadge: document.getElementById("mobileCounterBadge"),
+                stageStepper: document.getElementById("stageStepper"),
+                exportBtn: document.getElementById("exportBtn"),
+                resetBtn: document.getElementById("resetBtn"),
+                mobileTabPoem: document.getElementById("mobileTabPoem"),
+                mobileTabChat: document.getElementById("mobileTabChat"),
+                mobilePoemDot: document.getElementById("mobilePoemDot"),
+                poemPanel: document.getElementById("poemPanel"),
+                chatPanel: document.getElementById("chatPanel"),
+                // מצב העלאת יצירה
+                poemUploadState: document.getElementById("poemUploadState"),
+                uploadImageBtn: document.getElementById("uploadImageBtn"),
+                uploadTxtBtn: document.getElementById("uploadTxtBtn"),
+                imageFileInput: document.getElementById("imageFileInput"),
+                txtFileInput: document.getElementById("txtFileInput"),
+                setupOcrLoader: document.getElementById("setupOcrLoader"),
+                setupPoemTextarea: document.getElementById("setupPoemTextarea"),
+                setupAuthorInput: document.getElementById("setupAuthorInput"),
+                setupProductReqSelect: document.getElementById("setupProductReqSelect"),
+                loadPoemStartBtn: document.getElementById("loadPoemStartBtn"),
+                // מצב יצירה טעונה
+                poemLoadedState: document.getElementById("poemLoadedState"),
+                addStanzaBtn: document.getElementById("addStanzaBtn"),
+                toggleEditPoemBtn: document.getElementById("toggleEditPoemBtn"),
+                loadedAuthorInput: document.getElementById("loadedAuthorInput"),
+                loadedProductReqSelect: document.getElementById("loadedProductReqSelect"),
+                poemReaderCard: document.getElementById("poemReaderCard"),
+                poemLineStats: document.getElementById("poemLineStats"),
+                poemLinesContainer: document.getElementById("poemLinesContainer"),
+                poemInlineEditor: document.getElementById("poemInlineEditor"),
+                inlineEditTextarea: document.getElementById("inlineEditTextarea"),
+                cancelInlineEditBtn: document.getElementById("cancelInlineEditBtn"),
+                saveInlineEditBtn: document.getElementById("saveInlineEditBtn"),
+                // צ'אט
+                chatMessages: document.getElementById("chatMessages"),
+                typingIndicator: document.getElementById("typingIndicator"),
+                chatForm: document.getElementById("chatForm"),
+                chatImageUploadBtn: document.getElementById("chatImageUploadBtn"),
+                chatImageInput: document.getElementById("chatImageInput"),
+                chatInput: document.getElementById("chatInput"),
+                sendBtn: document.getElementById("sendBtn"),
+                // מודאל בית נוסף
+                stanzaModal: document.getElementById("stanzaModal"),
+                closeStanzaModalBtn: document.getElementById("closeStanzaModalBtn"),
+                stanzaOcrBtn: document.getElementById("stanzaOcrBtn"),
+                stanzaImageInput: document.getElementById("stanzaImageInput"),
+                stanzaOcrLoader: document.getElementById("stanzaOcrLoader"),
+                stanzaTextarea: document.getElementById("stanzaTextarea"),
+                cancelStanzaBtn: document.getElementById("cancelStanzaBtn"),
+                saveStanzaBtn: document.getElementById("saveStanzaBtn"),
+                // מודאל איפוס
+                resetModal: document.getElementById("resetModal"),
+                cancelResetBtn: document.getElementById("cancelResetBtn"),
+                confirmResetBtn: document.getElementById("confirmResetBtn"),
+                // מודאל ייצוא
+                exportModal: document.getElementById("exportModal"),
+                closeExportModalBtn: document.getElementById("closeExportModalBtn"),
+                exportPreviewText: document.getElementById("exportPreviewText"),
+                copyExportBtn: document.getElementById("copyExportBtn"),
+                printExportBtn: document.getElementById("printExportBtn"),
+                downloadExportBtn: document.getElementById("downloadExportBtn"),
+                // Toast
+                toast: document.getElementById("toast")
+            };
 
-### שלב 4: ביקורת ויצירה (Criticism & Creation)
-- **מיקוד:** פיתוח קול ביקורתי והערכת בחירות פואטיות.
+            // ==========================================
+            // 4. פונקציות עזר ורינדור UI
+            // ==========================================
+            let toastTimer = null;
+            function showToast(message) {
+                el.toast.textContent = message;
+                el.toast.classList.remove("opacity-0", "pointer-events-none");
+                el.toast.classList.add("opacity-100");
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function () {
+                    el.toast.classList.remove("opacity-100");
+                    el.toast.classList.add("opacity-0", "pointer-events-none");
+                }, 2800);
+            }
 
-### שלב 5: העמקה ברובד תיאורטי
-- **מיקוד:** קריאת השיר דרך עדשה תיאורטית רלוונטית (למשל: פוליטית, מגדרית, חברתית, פסיכולוגית או פוסט-קולוניאלית).
+            function escapeHtml(str) {
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;");
+            }
 
----
+            function formatMessageHtml(text, isUserBubble) {
+                let safe = escapeHtml(text);
+                const boldClass = isUserBubble ? "font-bold text-white" : "font-bold text-slate-900";
+                safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong class="' + boldClass + '">$1</strong>');
+                safe = safe.replace(/\*(.+?)\*/g, '<em class="italic">$1</em>');
+                safe = safe.replace(/^&gt;\s?(.+)$/gm, '<blockquote class="border-r-2 border-amber-500 pr-3 my-1.5 opacity-90 italic">$1</blockquote>');
+                safe = safe.replace(/^[-•]\s+(.+)$/gm, '<div class="flex items-start gap-2 my-1"><span class="text-amber-600 font-bold">•</span><span>$1</span></div>');
+                safe = safe.replace(/\n/g, "<br>");
+                return safe;
+            }
 
-## שלב הסיום: בניית תוצר (רק לאחר מיצוי 5 השלבים או הגעה ל-15 שאלות)
-לאחר שסיימתם את 5 שלבי הניתוח, הצע לסטודנטית לבחור אחד מ-3 התוצרים הבאים (אלא אם הוגדרה דרישת מרצה בשלב 0):
+            function autoResizeTextarea() {
+                el.chatInput.style.height = "auto";
+                el.chatInput.style.height = Math.min(el.chatInput.scrollHeight, 140) + "px";
+            }
 
-1. **תוצר 1 – קטע מסכם של הניתוח:**
-   - אל תכתוב את הסיכום במקומה. בנה אותו יחד איתה באמצעות **5 שאלות בלבד** (שאלה אחת לכל אחד מ-5 השלבים).
-   - רק לאחר שענתה על 5 השאלות, שאל אותה: *"האם תרצי שאארגן את התשובות שלך לקטע מסכם שלם וערוך?"* – ואם תאשר, הגש לה את הקטע המלא.
+            function switchMobileTab(tabName) {
+                if (tabName === "poem") {
+                    el.poemPanel.classList.remove("hidden");
+                    el.poemPanel.classList.add("flex");
+                    el.chatPanel.classList.add("hidden");
+                    el.chatPanel.classList.remove("flex");
 
-2. **תוצר 2 – רפלקציה על תהליך הלמידה:**
-   - הנחה את הסטודנטית באמצעות **5 שאלות רפלקטיביות** על התהליך שעברה איתך.
-
-3. **תוצר 3 – כתיבת טקסט פואטי מתכתב:**
-   - הנחה אותה לכתוב שיר או קטע פואטי שמתכתב עם היצירה שנלמדה, באמצעות **5 שאלות מנחות** לבניית טקסט פואטי.
-
----
-
-# טיפול בתרחישים מיוחדים
-- **"אני לא מבינה כלום":** אל תסביר את השיר. פשט והתחל ממילה אחת או מהרגש הכללי.
-- **"מה הפירוש הנכון?":** הזכר שאין פירוש יחיד, אלא פירושים המבוססים על הטקסט.
-- **סטודנטית מתקדמת/מהירה:** דלג על תצפיות בסיסיות ועבור מהר יותר ליחסי צורה-תוכן, ביקורת והרובד התיאורטי.
-
----
-
-# הנחיה טכנית למערכת (חובה בכל תגובה)
-בסוף כל תגובה שלך, בשורה נפרדת בסיום הטקסט, הוסף תגית מערכת אחת בלבד המציינת את השלב הנוכחי שבו נמצאת השיחה כעת:
-[[STAGE:0]] או [[STAGE:1]] או [[STAGE:2]] או [[STAGE:3]] או [[STAGE:4]] או [[STAGE:5]] או [[STAGE:FINAL]]
-אל תסביר את התגית ואל תתייחס אליה בתשובתך — המערכת מסירה אותה אוטומטית כדי לעדכן את סרגל ההתקדמות.`;
-
-        // ==========================================
-        // מצב האפליקציה (State)
-        // ==========================================
-        const state = {
-            poemText: "",
-            author: "",
-            productRequirement: "בחירה חופשית של הסטודנטית בסיום",
-            currentStage: "0",
-            analysisQuestionsCount: 0,
-            finalQuestionsCount: 0,
-            messages: [], // { role: 'user' | 'model', text: string }
-            isLoading: false,
-            modalMode: "new" // 'new' | 'edit' | 'add_stanza'
-        };
-
-        // ==========================================
-        // רכיבי DOM
-        // ==========================================
-        const el = {
-            stageStepper: document.getElementById("stageStepper"),
-            headerStageBadge: document.getElementById("headerStageBadge"),
-            headerCounterBadge: document.getElementById("headerCounterBadge"),
-            mobileCounterText: document.getElementById("mobileCounterText"),
-            mobileTabPoem: document.getElementById("mobileTabPoem"),
-            mobileTabChat: document.getElementById("mobileTabChat"),
-            mobilePoemDot: document.getElementById("mobilePoemDot"),
-            poemPanel: document.getElementById("poemPanel"),
-            chatPanel: document.getElementById("chatPanel"),
-            poemEmptyState: document.getElementById("poemEmptyState"),
-            poemLoadedState: document.getElementById("poemLoadedState"),
-            dropZone: document.getElementById("dropZone"),
-            fileUploadInput: document.getElementById("fileUploadInput"),
-            openPasteModalBtn: document.getElementById("openPasteModalBtn"),
-            authorInput: document.getElementById("authorInput"),
-            productReqSelect: document.getElementById("productReqSelect"),
-            poemDisplayContent: document.getElementById("poemDisplayContent"),
-            poemStats: document.getElementById("poemStats"),
-            addStanzaBtn: document.getElementById("addStanzaBtn"),
-            editPoemBtn: document.getElementById("editPoemBtn"),
-            chatMessages: document.getElementById("chatMessages"),
-            typingIndicator: document.getElementById("typingIndicator"),
-            quickActionsBar: document.getElementById("quickActionsBar"),
-            chatForm: document.getElementById("chatForm"),
-            chatInput: document.getElementById("chatInput"),
-            sendBtn: document.getElementById("sendBtn"),
-            chatUploadBtn: document.getElementById("chatUploadBtn"),
-            // מודאלים
-            textModal: document.getElementById("textModal"),
-            textModalTitle: document.getElementById("textModalTitle"),
-            closeTextModalBtn: document.getElementById("closeTextModalBtn"),
-            cancelTextModalBtn: document.getElementById("cancelTextModalBtn"),
-            saveTextModalBtn: document.getElementById("saveTextModalBtn"),
-            ocrLoadingBox: document.getElementById("ocrLoadingBox"),
-            modalFormFields: document.getElementById("modalFormFields"),
-            modalQuickUploadWrapper: document.getElementById("modalQuickUploadWrapper"),
-            modalStanzaImageInput: document.getElementById("modalStanzaImageInput"),
-            modalAuthorGroup: document.getElementById("modalAuthorGroup"),
-            modalAuthorInput: document.getElementById("modalAuthorInput"),
-            modalPoemTextarea: document.getElementById("modalPoemTextarea"),
-            resetBtn: document.getElementById("resetBtn"),
-            resetModal: document.getElementById("resetModal"),
-            cancelResetBtn: document.getElementById("cancelResetBtn"),
-            confirmResetBtn: document.getElementById("confirmResetBtn"),
-            exportBtn: document.getElementById("exportBtn"),
-            exportModal: document.getElementById("exportModal"),
-            closeExportModalBtn: document.getElementById("closeExportModalBtn"),
-            exportPreviewText: document.getElementById("exportPreviewText"),
-            copyExportBtn: document.getElementById("copyExportBtn"),
-            downloadExportBtn: document.getElementById("downloadExportBtn"),
-            toast: document.getElementById("toast")
-        };
-
-        // ==========================================
-        // פונקציות עזר ל-UI
-        // ==========================================
-        let toastTimeout;
-        function showToast(msg) {
-            el.toast.textContent = msg;
-            el.toast.classList.remove("opacity-0", "pointer-events-none");
-            el.toast.classList.add("opacity-100");
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                el.toast.classList.remove("opacity-100");
-                el.toast.classList.add("opacity-0", "pointer-events-none");
-            }, 2800);
-        }
-
-        // המרת Markdown בסיסי (הדגשה, הטיה, רשימות ושורות חדשות) ל-HTML בטוח
-        function formatMessageHTML(text) {
-            let safe = text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;");
-
-            // הדגשות והטיות
-            safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>');
-            safe = safe.replace(/\*(.+?)\*/g, '<em class="italic">$1</em>');
-            // ציטוטים
-            safe = safe.replace(/^&gt;\s?(.+)$/gm, '<blockquote class="border-r-3 border-amber-500 pr-3 my-1.5 text-slate-700 italic">$1</blockquote>');
-            // פריטי רשימה
-            safe = safe.replace(/^[-•]\s+(.+)$/gm, '<div class="flex items-start gap-2 my-1"><span class="text-amber-600 font-bold">•</span><span>$1</span></div>');
-            // שורות חדשות
-            safe = safe.replace(/\n/g, "<br>");
-            return safe;
-        }
-
-        // עדכון פס ההתקדמות ומונה השאלות
-        function renderProgress() {
-            const currentIndex = STAGES.findIndex(s => s.id === state.currentStage);
-            el.stageStepper.innerHTML = STAGES.map((stage, idx) => {
-                const isActive = stage.id === state.currentStage;
-                const isPast = idx < currentIndex;
-                let classes = "px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition-colors flex items-center gap-1 ";
-                if (isActive) {
-                    classes += "bg-indigoDeep-700 text-white shadow-xs font-bold";
-                } else if (isPast) {
-                    classes += "bg-emerald-50 text-emerald-800 border border-emerald-200/70";
+                    el.mobileTabPoem.classList.add("text-indigoDeep-700", "border-indigoDeep-700");
+                    el.mobileTabPoem.classList.remove("text-slate-600", "border-transparent");
+                    el.mobileTabChat.classList.remove("text-indigoDeep-700", "border-indigoDeep-700");
+                    el.mobileTabChat.classList.add("text-slate-600", "border-transparent");
                 } else {
-                    classes += "text-slate-500 bg-white border border-stone-200/70";
+                    el.chatPanel.classList.remove("hidden");
+                    el.chatPanel.classList.add("flex");
+                    el.poemPanel.classList.add("hidden");
+                    el.poemPanel.classList.remove("flex");
+
+                    el.mobileTabChat.classList.add("text-indigoDeep-700", "border-indigoDeep-700");
+                    el.mobileTabChat.classList.remove("text-slate-600", "border-transparent");
+                    el.mobileTabPoem.classList.remove("text-indigoDeep-700", "border-indigoDeep-700");
+                    el.mobileTabPoem.classList.add("text-slate-600", "border-transparent");
                 }
-                const check = isPast ? `<svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : "";
-                return `<div class="${classes}">${check}<span>${stage.label}</span></div>`;
-            }).join(`<span class="text-stone-300 text-xs">←</span>`);
-
-            const activeStageObj = STAGES[currentIndex] || STAGES[0];
-            el.headerStageBadge.textContent = `שלב ${activeStageObj.label}`;
-
-            if (state.currentStage === "FINAL") {
-                const counterStr = `שאלות תוצר: ${Math.min(state.finalQuestionsCount, 5)} / 5`;
-                el.headerCounterBadge.textContent = counterStr;
-                el.mobileCounterText.textContent = counterStr;
-            } else {
-                const counterStr = `שאלות ניתוח: ${Math.min(state.analysisQuestionsCount, 15)} / 15`;
-                el.headerCounterBadge.textContent = counterStr;
-                el.mobileCounterText.textContent = counterStr;
-            }
-        }
-
-        // תצוגת היצירה בפאנל היצירה
-        function renderPoem() {
-            if (!state.poemText.trim()) {
-                el.poemEmptyState.classList.remove("hidden");
-                el.poemLoadedState.classList.add("hidden");
-                el.mobilePoemDot.classList.add("hidden");
-                return;
             }
 
-            el.poemEmptyState.classList.add("hidden");
-            el.poemLoadedState.classList.remove("hidden");
-            el.mobilePoemDot.classList.remove("hidden");
-
-            el.authorInput.value = state.author;
-            el.productReqSelect.value = state.productRequirement;
-
-            const lines = state.poemText.split("\n");
-            let lineNum = 0;
-            let stanzaCount = 1;
-
-            el.poemDisplayContent.innerHTML = lines.map((line) => {
-                const trimmed = line.trim();
-                if (!trimmed) {
-                    stanzaCount++;
-                    return `<div class="h-4"></div>`;
-                }
-                lineNum++;
-                const escapedAttr = trimmed.replace(/"/g, "&quot;");
-                return `
-                    <div class="poem-line group flex items-baseline gap-3 px-2 py-0.5 rounded-lg cursor-pointer" data-quote="${escapedAttr}" title="לחצי לציטוט שורה זו בצ'אט">
-                        <span class="text-[11px] font-sans text-stone-400 w-5 text-left select-none shrink-0">${lineNum}</span>
-                        <span class="flex-1">${trimmed.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>
-                        <span class="opacity-0 group-hover:opacity-100 text-[10px] font-sans text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded shrink-0 transition-opacity">צטט</span>
-                    </div>
-                `;
-            }).join("");
-
-            el.poemStats.textContent = `${lineNum} שורות`;
-
-            // מאזינים לציטוט שורה בלחיצה
-            el.poemDisplayContent.querySelectorAll(".poem-line").forEach(row => {
-                row.addEventListener("click", () => {
-                    const quote = row.getAttribute("data-quote");
-                    const prefix = el.chatInput.value.trim() ? el.chatInput.value + " " : "";
-                    el.chatInput.value = `${prefix}"${quote}" `;
-                    autoResizeTextarea();
-                    el.chatInput.focus();
-                    showToast("השורה צוטטה לתיבת ההודעה");
-                    // במובייל — עבור אוטומטית לצ'אט
-                    if (window.innerWidth < 1024) {
-                        switchMobileTab("chat");
+            function renderProgress() {
+                const currentIdx = state.currentStage;
+                el.stageStepper.innerHTML = STAGES.map(function (stage) {
+                    const isActive = stage.id === currentIdx;
+                    const isPast = stage.id < currentIdx;
+                    let cls = "px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition-colors flex items-center gap-1 ";
+                    if (isActive) {
+                        cls += "bg-indigoDeep-700 text-white shadow-xs font-bold";
+                    } else if (isPast) {
+                        cls += "bg-emerald-50 text-emerald-800 border border-emerald-200";
+                    } else {
+                        cls += "text-slate-500 bg-white border border-stone-200";
                     }
-                });
-            });
-        }
-
-        // רינדור הצ'אט
-        function renderMessages() {
-            el.chatMessages.innerHTML = state.messages.map((msg, idx) => {
-                const isBot = msg.role === "model";
-                if (isBot) {
-                    const retryBtnHtml = msg.isError
-                        ? `<div class="mt-2.5 pt-2 border-t border-rose-100 flex items-center justify-between gap-2">
-                               <span class="text-xs text-rose-600">${msg.errorDetail ? msg.errorDetail : "בעיית תקשורת זמנית"}</span>
-                               <button type="button" data-retry-idx="${idx}" class="retry-msg-btn px-3 py-1 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors">
-                                   נסה שוב
-                               </button>
-                           </div>`
+                    const checkIcon = isPast
+                        ? '<svg class="w-3 h-3 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
                         : "";
-                    const bubbleClasses = msg.isError
-                        ? "bg-rose-50 border border-rose-200 rounded-2xl rounded-tr-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed text-rose-900 shadow-xs"
-                        : "bg-white border border-stone-200/90 rounded-2xl rounded-tr-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed text-slate-800 shadow-xs";
+                    return '<div class="' + cls + '">' + checkIcon + "<span>" + stage.label + "</span></div>";
+                }).join('<span class="text-stone-300 text-xs">←</span>');
 
-                    return `
-                        <div class="flex items-start gap-2.5 max-w-3xl">
-                            <div class="w-8 h-8 rounded-xl bg-indigoDeep-800 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/></svg>
-                            </div>
-                            <div class="${bubbleClasses}">
-                                ${formatMessageHTML(msg.text)}
-                                ${retryBtnHtml}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    return `
-                        <div class="flex items-start justify-end gap-2.5">
-                            <div class="bg-indigoDeep-700 text-white rounded-2xl rounded-tl-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed max-w-2xl shadow-xs">
-                                ${formatMessageHTML(msg.text).replace(/text-slate-900/g, "text-white")}
-                            </div>
-                        </div>
-                    `;
+                const stageObj = STAGES[currentIdx] || STAGES[0];
+                el.headerStageBadge.textContent = stageObj.label;
+
+                const counterLabel = currentIdx === 6
+                    ? "שאלות תוצר: " + Math.min(state.finalQuestionsCount, 5) + " / 5"
+                    : "שאלות ניתוח: " + Math.min(state.analysisQuestionsCount, 15) + " / 15";
+
+                el.headerCounterBadge.textContent = counterLabel;
+                el.mobileCounterBadge.textContent = counterLabel;
+            }
+
+            function renderPoemPanel() {
+                if (!state.isPoemLoaded) {
+                    el.poemUploadState.classList.remove("hidden");
+                    el.poemLoadedState.classList.add("hidden");
+                    el.mobilePoemDot.classList.add("hidden");
+                    el.setupPoemTextarea.value = state.poemText;
+                    el.setupAuthorInput.value = state.author;
+                    el.setupProductReqSelect.value = state.productRequirement;
+                    return;
                 }
-            }).join("");
 
-            // מאזינים לכפתורי "נסה שוב" בהודעות שגיאה
-            el.chatMessages.querySelectorAll(".retry-msg-btn").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    retryLastUserMessage();
+                el.poemUploadState.classList.add("hidden");
+                el.poemLoadedState.classList.remove("hidden");
+                el.mobilePoemDot.classList.remove("hidden");
+
+                el.loadedAuthorInput.value = state.author;
+                el.loadedProductReqSelect.value = state.productRequirement;
+
+                const rawLines = state.poemText.split("\n");
+                let lineNumber = 0;
+                const htmlParts = rawLines.map(function (line) {
+                    const trimmed = line.trim();
+                    if (!trimmed) {
+                        return '<div class="h-4"></div>';
+                    }
+                    lineNumber++;
+                    const safeText = escapeHtml(trimmed);
+                    return (
+                        '<div class="poem-line group flex items-baseline gap-3 px-2 py-0.5 rounded-lg cursor-pointer" data-quote="' + safeText + '" title="לחצי לציטוט שורה זו לשיחה">' +
+                            '<span class="text-[11px] font-sans text-stone-400 w-5 text-left select-none shrink-0">' + lineNumber + '</span>' +
+                            '<span class="flex-1">' + safeText + '</span>' +
+                            '<span class="opacity-0 group-hover:opacity-100 text-[10px] font-sans text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded shrink-0 transition-opacity">צטט</span>' +
+                        '</div>'
+                    );
                 });
-            });
 
-            el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
-            renderQuickActions();
-        }
+                el.poemLinesContainer.innerHTML = htmlParts.join("");
+                el.poemLineStats.textContent = lineNumber + " שורות";
 
-        // כפתורי פעולה מהירה מעל שורת הקלט
-        function renderQuickActions() {
-            const buttons = [];
-            if (state.messages.length === 1 && !state.poemText) {
-                buttons.push({
-                    label: "מוכנה! אני מעלה יצירה עכשיו",
-                    action: () => {
+                // חיבור אירוע לחיצה לציטוט כל שורה
+                const lineEls = el.poemLinesContainer.querySelectorAll(".poem-line");
+                lineEls.forEach(function (rowEl) {
+                    rowEl.addEventListener("click", function () {
+                        const quote = rowEl.getAttribute("data-quote");
+                        const currentVal = el.chatInput.value.trim();
+                        el.chatInput.value = (currentVal ? currentVal + " " : "") + '"' + quote + '" ';
+                        autoResizeTextarea();
+                        el.chatInput.focus();
+                        showToast("השורה צוטטה לתיבת ההודעה");
                         if (window.innerWidth < 1024) {
-                            switchMobileTab("poem");
-                        } else {
-                            openTextModal("new");
+                            switchMobileTab("chat");
                         }
-                    }
-                });
-            } else if (state.messages.length === 1 && state.poemText) {
-                buttons.push({
-                    label: "מוכנה! העליתי את היצירה, בוא נתחיל",
-                    action: () => sendUserMessage("מוכנה! העליתי את היצירה, אפשר להתחיל.")
-                });
-            }
-
-            el.quickActionsBar.innerHTML = buttons.map((btn, i) => `
-                <button type="button" data-quick-idx="${i}" class="text-xs font-medium bg-white hover:bg-indigoDeep-50 text-indigoDeep-700 border border-indigoDeep-200 px-3 py-1.5 rounded-full shadow-xs transition-colors">
-                    ${btn.label}
-                </button>
-            `).join("");
-
-            el.quickActionsBar.querySelectorAll("button").forEach(b => {
-                const idx = parseInt(b.getAttribute("data-quick-idx"), 10);
-                b.addEventListener("click", buttons[idx].action);
-            });
-        }
-
-        // ==========================================
-        // קריאות Gemini API עם Exponential Backoff
-        // ==========================================
-        async function fetchGeminiWithRetry(payload, maxRetries = 5) {
-            let delay = 1000;
-            for (let attempt = 0; attempt <= maxRetries; attempt++) {
-                try {
-                    const response = await fetch(GEMINI_API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
                     });
-
-                    if (!response.ok) {
-                        if (response.status === 429 || response.status >= 500) {
-                            throw new Error(`HTTP ${response.status}`);
-                        }
-                        const errData = await response.json().catch(() => ({}));
-                        throw new Error(errData.error?.message || `HTTP ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!text) {
-                        throw new Error("תשובה ריקה מהמודל");
-                    }
-                    return text;
-                } catch (err) {
-                    if (attempt === maxRetries) {
-                        throw err;
-                    }
-                    await new Promise(res => setTimeout(res, delay));
-                    delay *= 2;
-                }
+                });
             }
-        }
 
-        // חילוץ טקסט מתמונה באמצעות Gemini Vision
-        async function extractTextFromImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = async () => {
+            function renderMessages() {
+                el.chatMessages.innerHTML = state.messages.map(function (msg) {
+                    if (msg.role === "model") {
+                        const bubbleCls = msg.isError
+                            ? "bg-rose-50 border border-rose-200 rounded-2xl rounded-tr-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed text-rose-900 shadow-xs"
+                            : "bg-white border border-stone-200 rounded-2xl rounded-tr-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed text-slate-800 shadow-xs";
+
+                        let errorFooter = "";
+                        if (msg.isError) {
+                            const detailText = msg.errorDetail ? escapeHtml(msg.errorDetail) : "תקלת חיבור זמנית";
+                            errorFooter =
+                                '<div class="mt-2.5 pt-2 border-t border-rose-200/70 flex flex-wrap items-center justify-between gap-2">' +
+                                    '<span class="text-xs text-rose-700 font-mono break-all">' + detailText + '</span>' +
+                                    '<button type="button" class="retry-btn px-3 py-1.5 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors shrink-0">נסה שוב</button>' +
+                                '</div>';
+                        }
+
+                        return (
+                            '<div class="flex items-start gap-2.5 max-w-3xl">' +
+                                '<div class="w-8 h-8 rounded-xl bg-indigoDeep-800 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">' +
+                                    '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/></svg>' +
+                                '</div>' +
+                                '<div class="' + bubbleCls + '">' +
+                                    formatMessageHtml(msg.text, false) +
+                                    errorFooter +
+                                '</div>' +
+                            '</div>'
+                        );
+                    } else {
+                        return (
+                            '<div class="flex items-start justify-end gap-2.5">' +
+                                '<div class="bg-indigoDeep-700 text-white rounded-2xl rounded-tl-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed max-w-2xl shadow-xs">' +
+                                    formatMessageHtml(msg.text, true) +
+                                '</div>' +
+                            '</div>'
+                        );
+                    }
+                }).join("");
+
+                // חיבור כפתורי "נסה שוב" בהודעות שגיאה
+                const retryButtons = el.chatMessages.querySelectorAll(".retry-btn");
+                retryButtons.forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        executeBotTurn();
+                    });
+                });
+
+                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+            }
+
+            // ==========================================
+            // 5. תקשורת עם Gemini API (כולל Backoff וניקוי היסטוריה)
+            // ==========================================
+            async function fetchGeminiWithRetry(payload, maxRetries) {
+                const retries = typeof maxRetries === "number" ? maxRetries : 4;
+                let delay = 1000;
+
+                for (let attempt = 0; attempt <= retries; attempt++) {
                     try {
-                        const base64Data = reader.result.split(",")[1];
-                        const mimeType = file.type || "image/jpeg";
+                        const response = await fetch(GEMINI_API_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload)
+                        });
 
-                        const payload = {
-                            contents: [{
-                                role: "user",
-                                parts: [
-                                    {
-                                        text: "חלץ במדויק את כל הטקסט הספרותי (שיר או קטע פרוזה) המופיע בתמונה הזו. שמור בקפדנות על שבירת השורות המקורית, הרווחים בין הבתים, סימני הפיסוק והניקוד אם מופיע. החזר אך ורק את הטקסט המחולץ ללא שום הקדמה, כותרת נוספת או הסבר."
-                                    },
-                                    {
-                                        inlineData: { mimeType, data: base64Data }
-                                    }
-                                ]
-                            }]
-                        };
+                        if (!response.ok) {
+                            let errMsg = "HTTP " + response.status;
+                            try {
+                                const errJson = await response.json();
+                                if (errJson && errJson.error && errJson.error.message) {
+                                    errMsg = errJson.error.message;
+                                }
+                            } catch (e) {
+                                // התעלמות משגיאת פיענוח JSON בשגיאה
+                            }
 
-                        const extracted = await fetchGeminiWithRetry(payload);
-                        resolve(extracted.trim());
-                    } catch (error) {
-                        reject(error);
+                            if (response.status === 429 || response.status >= 500) {
+                                throw new Error(errMsg);
+                            }
+                            const fatalErr = new Error(errMsg);
+                            fatalErr.noRetry = true;
+                            throw fatalErr;
+                        }
+
+                        const data = await response.json();
+                        const text = data &&
+                            data.candidates &&
+                            data.candidates[0] &&
+                            data.candidates[0].content &&
+                            data.candidates[0].content.parts &&
+                            data.candidates[0].content.parts[0] &&
+                            data.candidates[0].content.parts[0].text;
+
+                        if (!text) {
+                            throw new Error("התקבלה תשובה ריקה מהשרת");
+                        }
+                        return text;
+                    } catch (err) {
+                        if (err.noRetry || attempt === retries) {
+                            throw err;
+                        }
+                        await new Promise(function (resolve) { setTimeout(resolve, delay); });
+                        delay *= 2;
                     }
-                };
-                reader.onerror = () => reject(new Error("שגיאה בקריאת הקובץ"));
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // בניית פרומפט מערכת דינמי עם היצירה וסטטוס השאלות
-        function buildDynamicSystemPrompt() {
-            let contextBlock = "\n\n---\n# הקשר נוכחי של האפליקציה (מידע חי)\n";
-            if (state.poemText.trim()) {
-                contextBlock += `**היצירה שהסטודנטית העלתה:**\n"""\n${state.poemText.trim()}\n"""\n`;
-            } else {
-                contextBlock += `**היצירה:** טרם הועלתה יצירה. הזמן את הסטודנטית להעלות תמונה או טקסט של היצירה.\n`;
-            }
-
-            contextBlock += `**שם היוצר/ת שצוין עד כה:** ${state.author.trim() ? state.author.trim() : "טרם צוין (חובה לשאול בשלב 0 לפני תחילת הניתוח!)"}\n`;
-            contextBlock += `**דרישת תוצר מהמרצה:** ${state.productRequirement}\n`;
-            contextBlock += `**שלב נוכחי:** ${state.currentStage}\n`;
-            contextBlock += `**מונה שאלות בשלבי הניתוח (1 עד 5):** ${state.analysisQuestionsCount} מתוך 15 מקסימום.\n`;
-            if (state.analysisQuestionsCount >= 13 && state.currentStage !== "FINAL" && state.currentStage !== "0") {
-                contextBlock += `⚠️ **שים לב:** אתם מתקרבים למגבלת 15 השאלות! סיים את השלב הנוכחי ועבור בקרוב לשלב הסיום (תוצר).\n`;
-            }
-            if (state.analysisQuestionsCount >= 15 && state.currentStage !== "FINAL") {
-                contextBlock += `🛑 **חובה כעת:** הגעת ל-15 שאלות ניתוח. אל תשאל עוד שאלות ניתוח — סכם במשפט קצר את המעבר והצע מיד את שלב הסיום ובחירת התוצר (וסמן [[STAGE:FINAL]]).\n`;
-            }
-            if (state.currentStage === "FINAL") {
-                contextBlock += `**מונה שאלות בשלב התוצר:** ${state.finalQuestionsCount} מתוך 5.\n`;
-            }
-
-            return BASE_SYSTEM_PROMPT + contextBlock;
-        }
-
-        // בניית מערך contents תקין ב-100% עבור Gemini API:
-        // 1. מסנן הודעת פתיחה (UI בלבד) והודעות שגיאה
-        // 2. מבטיח התחלה ב-role: "user"
-        // 3. ממזג הודעות עוקבות מאותו role לשמירה על סירוגין קפדני (user -> model -> user)
-        function buildGeminiContents() {
-            const validMessages = state.messages.filter(m => !m.isGreeting && !m.isError && m.text && m.text.trim());
-            const contents = [];
-
-            for (const msg of validMessages) {
-                const role = msg.role === "model" ? "model" : "user";
-                // לא מאפשרים למערך להתחיל ב-model
-                if (contents.length === 0 && role !== "user") {
-                    continue;
                 }
-                const last = contents[contents.length - 1];
-                if (last && last.role === role) {
-                    last.parts[0].text += "\n\n" + msg.text.trim();
+            }
+
+            function readFileAsBase64(file) {
+                return new Promise(function (resolve, reject) {
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        const resultStr = String(reader.result || "");
+                        const parts = resultStr.split(",");
+                        if (parts.length < 2) {
+                            reject(new Error("פורמט תמונה לא תקין"));
+                            return;
+                        }
+                        resolve({
+                            base64: parts[1],
+                            mimeType: file.type || "image/jpeg"
+                        });
+                    };
+                    reader.onerror = function () {
+                        reject(new Error("שגיאה בקריאת קובץ התמונה"));
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            async function extractTextFromImage(file) {
+                const imgData = await readFileAsBase64(file);
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            {
+                                text: "חלץ במדויק את כל הטקסט הספרותי (שיר או קטע פרוזה) המופיע בתמונה הזו בעברית. שמור בקפדנות על שבירת השורות המקורית, הרווחים בין הבתים, סימני הפיסוק והניקוד אם קיים. החזר אך ורק את הטקסט המחולץ ללא הקדמות או הסברים."
+                            },
+                            {
+                                inlineData: {
+                                    mimeType: imgData.mimeType,
+                                    data: imgData.base64
+                                }
+                            }
+                        ]
+                    }]
+                };
+                const extracted = await fetchGeminiWithRetry(payload, 3);
+                return extracted.trim();
+            }
+
+            function buildDynamicSystemInstruction() {
+                const stageLabel = (STAGES[state.currentStage] || STAGES[0]).label;
+                let statusSection = "\n\n---\n# מצב מערכת חי\n";
+                statusSection += "[סטטוס מערכת: שלב נוכחי " + state.currentStage + " (" + stageLabel + "), שאלת ניתוח " + state.analysisQuestionsCount + " מתוך 15]\n";
+
+                if (state.poemText.trim()) {
+                    statusSection += "**היצירה שהסטודנטית העלתה:**\n\"\"\"\n" + state.poemText.trim() + "\n\"\"\"\n";
                 } else {
-                    contents.push({
-                        role,
-                        parts: [{ text: msg.text.trim() }]
+                    statusSection += "**היצירה:** טרם הועלתה יצירה. הזמן את הסטודנטית להעלות את היצירה בפאנל היצירה או דרך כפתור התמונה.\n";
+                }
+
+                statusSection += "**שם היוצר/ת:** " + (state.author.trim() ? state.author.trim() : "טרם צוין (חובה לברר בשלב 0 לפני תחילת הניתוח)") + "\n";
+                statusSection += "**דרישת תוצר מהמרצה:** " + state.productRequirement + "\n";
+
+                if (state.currentStage >= 1 && state.currentStage <= 5 && state.analysisQuestionsCount >= 13 && state.analysisQuestionsCount < 15) {
+                    statusSection += "⚠️ מתקרבים למגבלת 15 השאלות! היערך למעבר לשלב 6 (תוצר סופי).\n";
+                }
+                if (state.currentStage < 6 && state.analysisQuestionsCount >= 15) {
+                    statusSection += "🛑 הגעת ל-15 שאלות ניתוח. אל תשאל עוד שאלות ניתוח — עבור כעת לשלב 6 והצע את שלב התוצר הסופי (וסמן [[STAGE:6]]).\n";
+                }
+                if (state.currentStage === 6) {
+                    statusSection += "**מונה שאלות בשלב התוצר הסופי:** " + state.finalQuestionsCount + " מתוך 5.\n";
+                }
+
+                return BASE_SYSTEM_PROMPT + statusSection;
+            }
+
+            // ניקוי היסטוריה קפדני לפני כל קריאה ל-Gemini API
+            function buildSanitizedContents() {
+                const cleanMessages = state.messages.filter(function (m) {
+                    return !m.isGreeting && !m.isError && m.text && m.text.trim().length > 0;
+                });
+
+                const contents = [];
+                for (let i = 0; i < cleanMessages.length; i++) {
+                    const msg = cleanMessages[i];
+                    const role = msg.role === "model" ? "model" : "user";
+
+                    // מבטיח שההיסטוריה תמיד מתחילה ב-user
+                    if (contents.length === 0 && role !== "user") {
+                        continue;
+                    }
+
+                    // מיזוג הודעות עוקבות מאותו role לסירוגין קפדני (user -> model -> user)
+                    const prev = contents.length > 0 ? contents[contents.length - 1] : null;
+                    if (prev && prev.role === role) {
+                        prev.parts[0].text += "\n\n" + msg.text.trim();
+                    } else {
+                        contents.push({
+                            role: role,
+                            parts: [{ text: msg.text.trim() }]
+                        });
+                    }
+                }
+                return contents;
+            }
+
+            async function executeBotTurn() {
+                if (state.isLoading) return;
+
+                const contents = buildSanitizedContents();
+                if (contents.length === 0) return;
+
+                // הסרת הודעות שגיאה קודמות לפני ניסיון חדש
+                state.messages = state.messages.filter(function (m) { return !m.isError; });
+                renderMessages();
+
+                state.isLoading = true;
+                el.sendBtn.disabled = true;
+                el.typingIndicator.classList.remove("hidden");
+                el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
+
+                try {
+                    const payload = {
+                        contents: contents,
+                        systemInstruction: {
+                            parts: [{ text: buildDynamicSystemInstruction() }]
+                        }
+                    };
+
+                    const rawReply = await fetchGeminiWithRetry(payload, 4);
+
+                    // הסרת תגית [[STAGE:N]] ועדכון שלב ההתקדמות
+                    let displayReply = rawReply;
+                    const stageMatch = rawReply.match(/\[{1,2}STAGE:([0-6])\]{1,2}/);
+                    if (stageMatch) {
+                        state.currentStage = parseInt(stageMatch[1], 10);
+                        displayReply = rawReply.replace(/\[{1,2}STAGE:[0-6]\]{1,2}/g, "").trim();
+                    }
+
+                    // קידום מוני שאלות
+                    if (state.currentStage >= 1 && state.currentStage <= 5) {
+                        state.analysisQuestionsCount++;
+                    } else if (state.currentStage === 6) {
+                        state.finalQuestionsCount++;
+                    }
+
+                    state.messages.push({ role: "model", text: displayReply });
+                    renderProgress();
+                    renderMessages();
+                } catch (err) {
+                    state.messages.push({
+                        role: "model",
+                        isError: true,
+                        errorDetail: err && err.message ? err.message : "שגיאת רשת",
+                        text: "אירעה תקלה בחיבור לבוט קול. לחצי על 'נסה שוב' כדי לשלוח מחדש."
                     });
+                    renderMessages();
+                } finally {
+                    state.isLoading = false;
+                    el.sendBtn.disabled = false;
+                    el.typingIndicator.classList.add("hidden");
+                    el.chatInput.focus();
                 }
             }
 
-            return contents;
-        }
+            async function sendUserMessage(text) {
+                const clean = String(text || "").trim();
+                if (!clean || state.isLoading) return;
 
-        // שליחת בקשה ל-Gemini מתוך ההיסטוריה הנקייה
-        async function executeBotTurn() {
-            if (state.isLoading) return;
-
-            const contents = buildGeminiContents();
-            if (contents.length === 0) return;
-
-            // הסרת הודעות שגיאה קודמות לפני ניסיון חדש
-            state.messages = state.messages.filter(m => !m.isError);
-            renderMessages();
-
-            state.isLoading = true;
-            el.sendBtn.disabled = true;
-            el.typingIndicator.classList.remove("hidden");
-            el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
-
-            try {
-                const payload = {
-                    contents,
-                    systemInstruction: {
-                        parts: [{ text: buildDynamicSystemPrompt() }]
-                    }
-                };
-
-                const rawReply = await fetchGeminiWithRetry(payload);
-
-                // חילוץ תגית השלב הנסתרת (תומך גם ב-[STAGE:X] וגם ב-[[STAGE:X]])
-                let replyText = rawReply;
-                const stageMatch = rawReply.match(/\[{1,2}STAGE:(0|1|2|3|4|5|FINAL)\]{1,2}/);
-                if (stageMatch) {
-                    const detectedStage = stageMatch[1];
-                    state.currentStage = detectedStage;
-                    replyText = rawReply.replace(/\[{1,2}STAGE:(0|1|2|3|4|5|FINAL)\]{1,2}/g, "").trim();
-                }
-
-                // עדכון מוני שאלות לפי השלב
-                if (["1", "2", "3", "4", "5"].includes(state.currentStage)) {
-                    state.analysisQuestionsCount++;
-                } else if (state.currentStage === "FINAL") {
-                    state.finalQuestionsCount++;
-                }
-
-                state.messages.push({ role: "model", text: replyText });
-                renderProgress();
+                state.messages = state.messages.filter(function (m) { return !m.isError; });
+                state.messages.push({ role: "user", text: clean });
+                el.chatInput.value = "";
+                autoResizeTextarea();
                 renderMessages();
-            } catch (error) {
-                console.error("Bot-Kol Gemini API Error:", error);
-                state.messages.push({
-                    role: "model",
-                    isError: true,
-                    errorDetail: error?.message ? `שגיאה: ${error.message}` : "",
-                    text: "אירעה תקלה זמנית בחיבור לבוט קול. ניתן ללחוץ על 'נסה שוב' או לשלוח את ההודעה מחדש."
-                });
-                renderMessages();
-            } finally {
-                state.isLoading = false;
-                el.sendBtn.disabled = false;
-                el.typingIndicator.classList.add("hidden");
-                el.chatInput.focus();
-            }
-        }
 
-        // ניסיון חוזר על ההודעה האחרונה של המשתמשת
-        async function retryLastUserMessage() {
-            if (state.isLoading) return;
-            await executeBotTurn();
-        }
-
-        // שליחת הודעה לבוט קול
-        async function sendUserMessage(text) {
-            const cleanText = text.trim();
-            if (!cleanText || state.isLoading) return;
-
-            // הסרת הודעות שגיאה קודמות והוספת הודעת המשתמשת
-            state.messages = state.messages.filter(m => !m.isError);
-            state.messages.push({ role: "user", text: cleanText });
-            el.chatInput.value = "";
-            autoResizeTextarea();
-            renderMessages();
-
-            await executeBotTurn();
-        }
-
-                const payload = {
-                    contents,
-                    systemInstruction: {
-                        parts: [{ text: buildDynamicSystemPrompt() }]
-                    }
-                };
-
-                const rawReply = await fetchGeminiWithRetry(payload);
-
-                // חילוץ תגית השלב הנסתרת
-                let replyText = rawReply;
-                const stageMatch = rawReply.match(/\[\[STAGE:(0|1|2|3|4|5|FINAL)\]\]/);
-                if (stageMatch) {
-                    const detectedStage = stageMatch[1];
-                    state.currentStage = detectedStage;
-                    replyText = rawReply.replace(/\[\[STAGE:(0|1|2|3|4|5|FINAL)\]\]/g, "").trim();
-                }
-
-                // עדכון מוני שאלות לפי השלב
-                if (["1", "2", "3", "4", "5"].includes(state.currentStage)) {
-                    state.analysisQuestionsCount++;
-                } else if (state.currentStage === "FINAL") {
-                    state.finalQuestionsCount++;
-                }
-
-                state.messages.push({ role: "model", text: replyText });
-                renderProgress();
-                renderMessages();
-            } catch (error) {
-                state.messages.push({
-                    role: "model",
-                    text: "אירעה תקלה זמנית בחיבור. נסי לשלוח את ההודעה שוב בעוד רגע."
-                });
-                renderMessages();
-            } finally {
-                state.isLoading = false;
-                el.sendBtn.disabled = false;
-                el.typingIndicator.classList.add("hidden");
-                el.chatInput.focus();
-            }
-        }
-
-        // ==========================================
-        // טיפול בהעלאת קבצים ובמודאל הטקסט
-        // ==========================================
-        function openTextModal(mode, prefillText = "") {
-            state.modalMode = mode;
-            el.ocrLoadingBox.classList.add("hidden");
-            el.modalFormFields.classList.remove("hidden");
-            el.saveTextModalBtn.disabled = false;
-
-            if (mode === "new") {
-                el.textModalTitle.textContent = "העלאת יצירה ספרותית";
-                el.modalAuthorGroup.classList.remove("hidden");
-                el.modalQuickUploadWrapper.classList.add("hidden");
-                el.modalAuthorInput.value = state.author;
-                el.modalPoemTextarea.value = prefillText || state.poemText;
-            } else if (mode === "edit") {
-                el.textModalTitle.textContent = "עריכת טקסט היצירה";
-                el.modalAuthorGroup.classList.remove("hidden");
-                el.modalQuickUploadWrapper.classList.add("hidden");
-                el.modalAuthorInput.value = state.author;
-                el.modalPoemTextarea.value = state.poemText;
-            } else if (mode === "add_stanza") {
-                el.textModalTitle.textContent = "הוספת בית נוסף ליצירה";
-                el.modalAuthorGroup.classList.add("hidden");
-                el.modalQuickUploadWrapper.classList.remove("hidden");
-                el.modalPoemTextarea.value = prefillText;
+                await executeBotTurn();
             }
 
-            el.textModal.classList.remove("hidden");
-        }
+            // ==========================================
+            // 6. אירועי העלאת יצירה, עריכה והוספת בתים
+            // ==========================================
+            el.uploadImageBtn.addEventListener("click", function () {
+                el.imageFileInput.click();
+            });
 
-        function closeTextModal() {
-            el.textModal.classList.add("hidden");
-        }
+            el.uploadTxtBtn.addEventListener("click", function () {
+                el.txtFileInput.click();
+            });
 
-        async function handleFileSelection(file, mode = "new") {
-            if (!file) return;
+            el.imageFileInput.addEventListener("change", async function (e) {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = "";
+                if (!file) return;
 
-            if (file.type === "text/plain" || file.name.endsWith(".txt")) {
-                const text = await file.text();
-                openTextModal(mode, text.trim());
-                showToast("הטקסט נקרא מהקובץ — בדקי ואשרי");
-                return;
-            }
-
-            if (file.type.startsWith("image/")) {
-                state.modalMode = mode;
-                el.textModalTitle.textContent = mode === "add_stanza" ? "חילוץ בית נוסף מתמונה" : "חילוץ היצירה מתמונה";
-                el.modalAuthorGroup.classList.toggle("hidden", mode === "add_stanza");
-                el.modalQuickUploadWrapper.classList.add("hidden");
-                el.ocrLoadingBox.classList.remove("hidden");
-                el.modalFormFields.classList.add("hidden");
-                el.saveTextModalBtn.disabled = true;
-                el.textModal.classList.remove("hidden");
-
+                el.setupOcrLoader.classList.remove("hidden");
+                el.loadPoemStartBtn.disabled = true;
                 try {
                     const extracted = await extractTextFromImage(file);
-                    el.ocrLoadingBox.classList.add("hidden");
-                    el.modalFormFields.classList.remove("hidden");
-                    el.saveTextModalBtn.disabled = false;
-                    el.modalAuthorInput.value = state.author;
-                    el.modalPoemTextarea.value = extracted;
-                    showToast("הטקסט חולץ בהצלחה! בדקי שאין טעויות ואשרי");
+                    el.setupPoemTextarea.value = extracted;
+                    state.poemText = extracted;
+                    showToast("הטקסט חולץ בהצלחה! בדקי אותו ולחצי 'טען יצירה והתחל שיחה'");
                 } catch (err) {
-                    closeTextModal();
-                    showToast("לא הצלחתי לחלץ את הטקסט מהתמונה. נסי תמונה ברורה יותר או הדבקת טקסט.");
+                    showToast("לא ניתן לחלץ טקסט מהתמונה: " + (err.message || "שגיאה"));
+                } finally {
+                    el.setupOcrLoader.classList.add("hidden");
+                    el.loadPoemStartBtn.disabled = false;
                 }
-                return;
-            }
-
-            showToast("אנא בחרי קובץ תמונה (JPG/PNG) או קובץ טקסט (TXT)");
-        }
-
-        // שמירה מהמודאל
-        el.saveTextModalBtn.addEventListener("click", () => {
-            const text = el.modalPoemTextarea.value.trim();
-            if (!text) {
-                showToast("יש להזין את טקסט היצירה");
-                return;
-            }
-
-            if (state.modalMode === "add_stanza") {
-                state.poemText = state.poemText.trim() + "\n\n" + text;
-                renderPoem();
-                closeTextModal();
-                showToast("הבית נוסף ליצירה!");
-                // מעדכן את בוט קול בשיחה שהועלה בית חדש
-                sendUserMessage("העליתי עכשיו את הבית הבא של השיר. אפשר להמשיך!");
-            } else {
-                const isFirstUpload = !state.poemText.trim();
-                state.poemText = text;
-                state.author = el.modalAuthorInput.value.trim();
-                renderPoem();
-                closeTextModal();
-                showToast("היצירה נשמרה בהצלחה!");
-
-                if (isFirstUpload) {
-                    const authorNote = state.author ? ` מאת ${state.author}` : "";
-                    if (window.innerWidth < 1024) {
-                        switchMobileTab("chat");
-                    }
-                    sendUserMessage(`מוכנה! העליתי את היצירה${authorNote}.`);
-                }
-            }
-        });
-
-        // ==========================================
-        // טאבים במובייל
-        // ==========================================
-        function switchMobileTab(tab) {
-            if (tab === "poem") {
-                el.poemPanel.classList.remove("hidden");
-                el.poemPanel.classList.add("flex");
-                el.chatPanel.classList.add("hidden");
-                el.chatPanel.classList.remove("flex");
-
-                el.mobileTabPoem.classList.add("text-indigoDeep-700", "border-indigoDeep-700");
-                el.mobileTabPoem.classList.remove("text-slate-600", "border-transparent");
-                el.mobileTabChat.classList.remove("text-indigoDeep-700", "border-indigoDeep-700");
-                el.mobileTabChat.classList.add("text-slate-600", "border-transparent");
-            } else {
-                el.chatPanel.classList.remove("hidden");
-                el.chatPanel.classList.add("flex");
-                el.poemPanel.classList.add("hidden");
-                el.poemPanel.classList.remove("flex");
-
-                el.mobileTabChat.classList.add("text-indigoDeep-700", "border-indigoDeep-700");
-                el.mobileTabChat.classList.remove("text-slate-600", "border-transparent");
-                el.mobileTabPoem.classList.remove("text-indigoDeep-700", "border-indigoDeep-700");
-                el.mobileTabPoem.classList.add("text-slate-600", "border-transparent");
-            }
-        }
-
-        el.mobileTabPoem.addEventListener("click", () => switchMobileTab("poem"));
-        el.mobileTabChat.addEventListener("click", () => switchMobileTab("chat"));
-
-        // התאמת גובה אוטומטית לתיבת הצ'אט
-        function autoResizeTextarea() {
-            el.chatInput.style.height = "auto";
-            el.chatInput.style.height = Math.min(el.chatInput.scrollHeight, 140) + "px";
-        }
-        el.chatInput.addEventListener("input", autoResizeTextarea);
-        el.chatInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                el.chatForm.dispatchEvent(new Event("submit"));
-            }
-        });
-
-        // שליחת טופס הצ'אט
-        el.chatForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            sendUserMessage(el.chatInput.value);
-        });
-
-        // אירועי העלאת קבצים וגרירה
-        el.dropZone.addEventListener("click", () => el.fileUploadInput.click());
-        el.fileUploadInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            e.target.value = "";
-            handleFileSelection(file, state.poemText ? "add_stanza" : "new");
-        });
-
-        el.dropZone.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            el.dropZone.classList.add("border-indigoDeep-500", "bg-indigoDeep-50/50");
-        });
-        el.dropZone.addEventListener("dragleave", () => {
-            el.dropZone.classList.remove("border-indigoDeep-500", "bg-indigoDeep-50/50");
-        });
-        el.dropZone.addEventListener("drop", (e) => {
-            e.preventDefault();
-            el.dropZone.classList.remove("border-indigoDeep-500", "bg-indigoDeep-50/50");
-            const file = e.dataTransfer.files[0];
-            handleFileSelection(file, "new");
-        });
-
-        // כפתור העלאה מהירה מתוך שורת הצ'אט
-        el.chatUploadBtn.addEventListener("click", () => {
-            el.fileUploadInput.click();
-        });
-
-        // כפתורי עריכה והוספת בית
-        el.openPasteModalBtn.addEventListener("click", () => openTextModal("new"));
-        el.editPoemBtn.addEventListener("click", () => openTextModal("edit"));
-        el.addStanzaBtn.addEventListener("click", () => openTextModal("add_stanza"));
-        el.closeTextModalBtn.addEventListener("click", closeTextModal);
-        el.cancelTextModalBtn.addEventListener("click", closeTextModal);
-
-        el.modalStanzaImageInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            e.target.value = "";
-            handleFileSelection(file, "add_stanza");
-        });
-
-        // עדכון שם יוצר ודרישת מרצה בפאנל היצירה
-        el.authorInput.addEventListener("input", (e) => {
-            state.author = e.target.value;
-        });
-        el.productReqSelect.addEventListener("change", (e) => {
-            state.productRequirement = e.target.value;
-            showToast("דרישת התוצר עודכנה עבור בוט קול");
-        });
-
-        // ==========================================
-        // איפוס וייצוא
-        // ==========================================
-        el.resetBtn.addEventListener("click", () => el.resetModal.classList.remove("hidden"));
-        el.cancelResetBtn.addEventListener("click", () => el.resetModal.classList.add("hidden"));
-        el.confirmResetBtn.addEventListener("click", () => {
-            el.resetModal.classList.add("hidden");
-            initSession();
-            showToast("נפתחה שיחה חדשה עם בוט קול");
-        });
-
-        el.exportBtn.addEventListener("click", () => {
-            let output = `=== תיעוד קריאה פואטית עם בוט קול ===\n`;
-            output += `יוצר/ת: ${state.author || "לא צוין"}\n`;
-            output += `דרישת תוצר: ${state.productRequirement}\n\n`;
-            if (state.poemText) {
-                output += `--- היצירה ---\n${state.poemText}\n\n`;
-            }
-            output += `--- מהלך השיחה והתוצר ---\n`;
-            state.messages.forEach(m => {
-                const speaker = m.role === "model" ? "בוט קול" : "סטודנטית";
-                output += `\n[${speaker}]:\n${m.text}\n`;
             });
 
-            el.exportPreviewText.value = output;
-            el.exportModal.classList.remove("hidden");
-        });
+            el.txtFileInput.addEventListener("change", async function (e) {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = "";
+                if (!file) return;
 
-        el.closeExportModalBtn.addEventListener("click", () => el.exportModal.classList.add("hidden"));
+                try {
+                    const txt = await file.text();
+                    el.setupPoemTextarea.value = txt.trim();
+                    state.poemText = txt.trim();
+                    showToast("קובץ הטקסט נטען לתצוגה המקדימה");
+                } catch (err) {
+                    showToast("שגיאה בקריאת קובץ הטקסט");
+                }
+            });
 
-        el.copyExportBtn.addEventListener("click", () => {
-            el.exportPreviewText.select();
-            try {
-                document.execCommand("copy");
-                showToast("הטקסט הועתק ללוח!");
-            } catch (e) {
-                showToast("לא ניתן להעתיק אוטומטית — סמני והעתיקי ידנית");
+            // טעינת היצירה והתחלת השיחה
+            el.loadPoemStartBtn.addEventListener("click", function () {
+                const poemVal = el.setupPoemTextarea.value.trim();
+                if (!poemVal) {
+                    showToast("אנא הדביקי טקסט או העלי תמונה/קובץ של היצירה קודם");
+                    el.setupPoemTextarea.focus();
+                    return;
+                }
+
+                state.poemText = poemVal;
+                state.author = el.setupAuthorInput.value.trim();
+                state.productRequirement = el.setupProductReqSelect.value;
+                state.isPoemLoaded = true;
+
+                renderPoemPanel();
+                showToast("היצירה נטענה! מתחילים את השיחה עם בוט קול");
+
+                if (window.innerWidth < 1024) {
+                    switchMobileTab("chat");
+                }
+
+                let introMsg = "מוכנה! העליתי את היצירה.";
+                if (state.author) {
+                    introMsg += " שם היוצר/ת: " + state.author + ".";
+                }
+                if (state.productRequirement !== "בחירה חופשית בסיום") {
+                    introMsg += " דרישת המרצה לתוצר הסופי: " + state.productRequirement + ".";
+                }
+                sendUserMessage(introMsg);
+            });
+
+            // סנכרון שדות מטא-דאטה כשהיצירה טעונה
+            el.loadedAuthorInput.addEventListener("input", function (e) {
+                state.author = e.target.value;
+            });
+
+            el.loadedProductReqSelect.addEventListener("change", function (e) {
+                state.productRequirement = e.target.value;
+                showToast("דרישת התוצר עודכנה");
+            });
+
+            // עריכה פנימית (Inline Edit) של היצירה
+            el.toggleEditPoemBtn.addEventListener("click", function () {
+                const isEditing = !el.poemInlineEditor.classList.contains("hidden");
+                if (isEditing) {
+                    el.poemInlineEditor.classList.add("hidden");
+                    el.poemReaderCard.classList.remove("hidden");
+                } else {
+                    el.inlineEditTextarea.value = state.poemText;
+                    el.poemReaderCard.classList.add("hidden");
+                    el.poemInlineEditor.classList.remove("hidden");
+                    el.inlineEditTextarea.focus();
+                }
+            });
+
+            el.cancelInlineEditBtn.addEventListener("click", function () {
+                el.poemInlineEditor.classList.add("hidden");
+                el.poemReaderCard.classList.remove("hidden");
+            });
+
+            el.saveInlineEditBtn.addEventListener("click", function () {
+                const updated = el.inlineEditTextarea.value.trim();
+                if (!updated) {
+                    showToast("טקסט היצירה לא יכול להיות ריק");
+                    return;
+                }
+                state.poemText = updated;
+                el.poemInlineEditor.classList.add("hidden");
+                el.poemReaderCard.classList.remove("hidden");
+                renderPoemPanel();
+                showToast("היצירה עודכנה בהצלחה");
+            });
+
+            // מודאל הוספת בית נוסף
+            function openStanzaModal(prefill) {
+                el.stanzaTextarea.value = prefill || "";
+                el.stanzaOcrLoader.classList.add("hidden");
+                el.stanzaModal.classList.remove("hidden");
             }
+
+            function closeStanzaModal() {
+                el.stanzaModal.classList.add("hidden");
+            }
+
+            el.addStanzaBtn.addEventListener("click", function () {
+                openStanzaModal("");
+            });
+
+            el.closeStanzaModalBtn.addEventListener("click", closeStanzaModal);
+            el.cancelStanzaBtn.addEventListener("click", closeStanzaModal);
+
+            el.stanzaOcrBtn.addEventListener("click", function () {
+                el.stanzaImageInput.click();
+            });
+
+            el.stanzaImageInput.addEventListener("change", async function (e) {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = "";
+                if (!file) return;
+
+                el.stanzaOcrLoader.classList.remove("hidden");
+                el.saveStanzaBtn.disabled = true;
+                try {
+                    const extracted = await extractTextFromImage(file);
+                    el.stanzaTextarea.value = extracted;
+                    showToast("הבית חולץ בהצלחה מהתמונה");
+                } catch (err) {
+                    showToast("שגיאה בחילוץ הבית מהתמונה: " + (err.message || ""));
+                } finally {
+                    el.stanzaOcrLoader.classList.add("hidden");
+                    el.saveStanzaBtn.disabled = false;
+                }
+            });
+
+            el.saveStanzaBtn.addEventListener("click", function () {
+                const stanza = el.stanzaTextarea.value.trim();
+                if (!stanza) {
+                    showToast("אנא הזיני את טקסט הבית הנוסף");
+                    return;
+                }
+                if (state.isPoemLoaded) {
+                    state.poemText = state.poemText.trim() + "\n\n" + stanza;
+                } else {
+                    state.poemText = stanza;
+                    state.isPoemLoaded = true;
+                }
+                renderPoemPanel();
+                closeStanzaModal();
+                showToast("הבית נוסף ליצירה!");
+                sendUserMessage("העליתי עכשיו את הבית הבא של היצירה:\n" + stanza);
+            });
+
+            // העלאת תמונה ישירות משורת הצ'אט
+            el.chatImageUploadBtn.addEventListener("click", function () {
+                el.chatImageInput.click();
+            });
+
+            el.chatImageInput.addEventListener("change", async function (e) {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = "";
+                if (!file) return;
+
+                if (!state.isPoemLoaded) {
+                    // אם עדיין אין יצירה — חלץ לתוך פאנל ההעלאה
+                    if (window.innerWidth < 1024) switchMobileTab("poem");
+                    el.setupOcrLoader.classList.remove("hidden");
+                    try {
+                        const extracted = await extractTextFromImage(file);
+                        el.setupPoemTextarea.value = extracted;
+                        state.poemText = extracted;
+                        showToast("הטקסט חולץ! לחצי על 'טען יצירה והתחל שיחה'");
+                    } catch (err) {
+                        showToast("שגיאה בחילוץ התמונה: " + (err.message || ""));
+                    } finally {
+                        el.setupOcrLoader.classList.add("hidden");
+                    }
+                } else {
+                    // אם כבר יש יצירה — פתח מודאל הוספת בית וחלץ לתוכו
+                    openStanzaModal("");
+                    el.stanzaOcrLoader.classList.remove("hidden");
+                    el.saveStanzaBtn.disabled = true;
+                    try {
+                        const extracted = await extractTextFromImage(file);
+                        el.stanzaTextarea.value = extracted;
+                        showToast("הבית חולץ! אשרי כדי להוסיף לשיחה");
+                    } catch (err) {
+                        showToast("שגיאה בחילוץ התמונה: " + (err.message || ""));
+                    } finally {
+                        el.stanzaOcrLoader.classList.add("hidden");
+                        el.saveStanzaBtn.disabled = false;
+                    }
+                }
+            });
+
+            // ==========================================
+            // 7. אירועי צ'אט, מובייל, איפוס וייצוא
+            // ==========================================
+            el.chatInput.addEventListener("input", autoResizeTextarea);
+
+            el.chatInput.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendUserMessage(el.chatInput.value);
+                }
+            });
+
+            el.chatForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                sendUserMessage(el.chatInput.value);
+            });
+
+            el.mobileTabPoem.addEventListener("click", function () { switchMobileTab("poem"); });
+            el.mobileTabChat.addEventListener("click", function () { switchMobileTab("chat"); });
+
+            // מודאל איפוס
+            el.resetBtn.addEventListener("click", function () {
+                el.resetModal.classList.remove("hidden");
+            });
+            el.cancelResetBtn.addEventListener("click", function () {
+                el.resetModal.classList.add("hidden");
+            });
+            el.confirmResetBtn.addEventListener("click", function () {
+                el.resetModal.classList.add("hidden");
+                initSession();
+                showToast("נפתחה שיחה חדשה עם בוט קול");
+            });
+
+            // בניית טקסט לייצוא
+            function buildExportDocument() {
+                let doc = "=== תיעוד קריאה פואטית עם בוט קול ===\n";
+                doc += "שם היוצר/ת: " + (state.author.trim() || "לא צוין") + "\n";
+                doc += "דרישת תוצר: " + state.productRequirement + "\n";
+                doc += "שלב שהושג: " + (STAGES[state.currentStage] ? STAGES[state.currentStage].label : "0") + "\n\n";
+
+                if (state.poemText.trim()) {
+                    doc += "--- היצירה ---\n" + state.poemText.trim() + "\n\n";
+                }
+
+                doc += "--- מהלך השיחה והתוצר הסופי ---\n";
+                state.messages.forEach(function (m) {
+                    if (m.isError) return;
+                    const speaker = m.role === "model" ? "בוט קול" : "סטודנטית";
+                    doc += "\n[" + speaker + "]:\n" + m.text + "\n";
+                });
+                return doc;
+            }
+
+            el.exportBtn.addEventListener("click", function () {
+                const exportText = buildExportDocument();
+                el.exportPreviewText.value = exportText;
+                el.printContainer.textContent = exportText;
+                el.exportModal.classList.remove("hidden");
+            });
+
+            el.closeExportModalBtn.addEventListener("click", function () {
+                el.exportModal.classList.add("hidden");
+            });
+
+            el.copyExportBtn.addEventListener("click", function () {
+                el.exportPreviewText.focus();
+                el.exportPreviewText.select();
+                try {
+                    document.execCommand("copy");
+                    showToast("הכל הועתק ללוח!");
+                } catch (err) {
+                    showToast("לא ניתן להעתיק אוטומטית — סמני והעתיקי ידנית");
+                }
+            });
+
+            el.printExportBtn.addEventListener("click", function () {
+                el.printContainer.textContent = el.exportPreviewText.value;
+                window.print();
+            });
+
+            el.downloadExportBtn.addEventListener("click", function () {
+                const content = el.exportPreviewText.value;
+                const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                const safeAuthor = state.author.trim() ? state.author.trim().replace(/\s+/g, "_") : "יצירה";
+                link.href = url;
+                link.download = "בוט_קול_" + safeAuthor + ".txt";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showToast("הקובץ הורד למחשב");
+            });
+
+            // ==========================================
+            // 8. אתחול שיחה חדשה
+            // ==========================================
+            function initSession() {
+                state.poemText = "";
+                state.author = "";
+                state.productRequirement = "בחירה חופשית בסיום";
+                state.isPoemLoaded = false;
+                state.currentStage = 0;
+                state.analysisQuestionsCount = 0;
+                state.finalQuestionsCount = 0;
+                state.isLoading = false;
+                state.messages = [
+                    { role: "model", text: OPENING_MESSAGE, isGreeting: true }
+                ];
+
+                el.poemInlineEditor.classList.add("hidden");
+                el.poemReaderCard.classList.remove("hidden");
+                el.chatInput.value = "";
+                autoResizeTextarea();
+
+                renderProgress();
+                renderPoemPanel();
+                renderMessages();
+            }
+
+            // הפעלה ראשונית
+            initSession();
         });
-
-        el.downloadExportBtn.addEventListener("click", () => {
-            const blob = new Blob([el.exportPreviewText.value], { type: "text/plain;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `בוט_קול_${state.author ? state.author.replace(/\s+/g, "_") : "ניתוח_שיר"}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast("הקובץ הורד למחשב");
-        });
-
-        // ==========================================
-        // אתחול שיחה חדשה
-        // ==========================================
-        function initSession() {
-            state.poemText = "";
-            state.author = "";
-            state.productRequirement = "בחירה חופשית של הסטודנטית בסיום";
-            state.currentStage = "0";
-            state.analysisQuestionsCount = 0;
-            state.finalQuestionsCount = 0;
-            state.isLoading = false;
-            state.messages = [
-                { role: "model", text: OPENING_MESSAGE, isGreeting: true }
-            ];
-
-            renderProgress();
-            renderPoem();
-            renderMessages();
-        }
-
-        // הפעלה בטעינת הדף
-        window.addEventListener("DOMContentLoaded", initSession);
     </script>
 </body>
 </html>
