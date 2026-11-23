@@ -709,16 +709,29 @@
 
         // רינדור הצ'אט
         function renderMessages() {
-            el.chatMessages.innerHTML = state.messages.map((msg) => {
+            el.chatMessages.innerHTML = state.messages.map((msg, idx) => {
                 const isBot = msg.role === "model";
                 if (isBot) {
+                    const retryBtnHtml = msg.isError
+                        ? `<div class="mt-2.5 pt-2 border-t border-rose-100 flex items-center justify-between gap-2">
+                               <span class="text-xs text-rose-600">${msg.errorDetail ? msg.errorDetail : "בעיית תקשורת זמנית"}</span>
+                               <button type="button" data-retry-idx="${idx}" class="retry-msg-btn px-3 py-1 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors">
+                                   נסה שוב
+                               </button>
+                           </div>`
+                        : "";
+                    const bubbleClasses = msg.isError
+                        ? "bg-rose-50 border border-rose-200 rounded-2xl rounded-tr-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed text-rose-900 shadow-xs"
+                        : "bg-white border border-stone-200/90 rounded-2xl rounded-tr-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed text-slate-800 shadow-xs";
+
                     return `
                         <div class="flex items-start gap-2.5 max-w-3xl">
                             <div class="w-8 h-8 rounded-xl bg-indigoDeep-800 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/></svg>
                             </div>
-                            <div class="bg-white border border-stone-200/90 rounded-2xl rounded-tr-sm px-4 py-3 text-sm sm:text-[15px] leading-relaxed text-slate-800 shadow-xs">
+                            <div class="${bubbleClasses}">
                                 ${formatMessageHTML(msg.text)}
+                                ${retryBtnHtml}
                             </div>
                         </div>
                     `;
@@ -732,6 +745,13 @@
                     `;
                 }
             }).join("");
+
+            // מאזינים לכפתורי "נסה שוב" בהודעות שגיאה
+            el.chatMessages.querySelectorAll(".retry-msg-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    retryLastUserMessage();
+                });
+            });
 
             el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
             renderQuickActions();
@@ -867,15 +887,43 @@
             return BASE_SYSTEM_PROMPT + contextBlock;
         }
 
-        // שליחת הודעה לבוט קול
-        async function sendUserMessage(text) {
-            const cleanText = text.trim();
-            if (!cleanText || state.isLoading) return;
+        // בניית מערך contents תקין ב-100% עבור Gemini API:
+        // 1. מסנן הודעת פתיחה (UI בלבד) והודעות שגיאה
+        // 2. מבטיח התחלה ב-role: "user"
+        // 3. ממזג הודעות עוקבות מאותו role לשמירה על סירוגין קפדני (user -> model -> user)
+        function buildGeminiContents() {
+            const validMessages = state.messages.filter(m => !m.isGreeting && !m.isError && m.text && m.text.trim());
+            const contents = [];
 
-            // הוספת הודעת המשתמשת
-            state.messages.push({ role: "user", text: cleanText });
-            el.chatInput.value = "";
-            autoResizeTextarea();
+            for (const msg of validMessages) {
+                const role = msg.role === "model" ? "model" : "user";
+                // לא מאפשרים למערך להתחיל ב-model
+                if (contents.length === 0 && role !== "user") {
+                    continue;
+                }
+                const last = contents[contents.length - 1];
+                if (last && last.role === role) {
+                    last.parts[0].text += "\n\n" + msg.text.trim();
+                } else {
+                    contents.push({
+                        role,
+                        parts: [{ text: msg.text.trim() }]
+                    });
+                }
+            }
+
+            return contents;
+        }
+
+        // שליחת בקשה ל-Gemini מתוך ההיסטוריה הנקייה
+        async function executeBotTurn() {
+            if (state.isLoading) return;
+
+            const contents = buildGeminiContents();
+            if (contents.length === 0) return;
+
+            // הסרת הודעות שגיאה קודמות לפני ניסיון חדש
+            state.messages = state.messages.filter(m => !m.isError);
             renderMessages();
 
             state.isLoading = true;
@@ -884,16 +932,71 @@
             el.chatMessages.scrollTop = el.chatMessages.scrollHeight;
 
             try {
-                // בניית היסטוריית שיחה תקינה (מתחילה תמיד ב-user)
-                const contents = [
-                    { role: "user", parts: [{ text: "שלום בוט קול, אני מתחילה שיחה חדשה." }] }
-                ];
-                for (const m of state.messages) {
-                    contents.push({
-                        role: m.role,
-                        parts: [{ text: m.text }]
-                    });
+                const payload = {
+                    contents,
+                    systemInstruction: {
+                        parts: [{ text: buildDynamicSystemPrompt() }]
+                    }
+                };
+
+                const rawReply = await fetchGeminiWithRetry(payload);
+
+                // חילוץ תגית השלב הנסתרת (תומך גם ב-[STAGE:X] וגם ב-[[STAGE:X]])
+                let replyText = rawReply;
+                const stageMatch = rawReply.match(/\[{1,2}STAGE:(0|1|2|3|4|5|FINAL)\]{1,2}/);
+                if (stageMatch) {
+                    const detectedStage = stageMatch[1];
+                    state.currentStage = detectedStage;
+                    replyText = rawReply.replace(/\[{1,2}STAGE:(0|1|2|3|4|5|FINAL)\]{1,2}/g, "").trim();
                 }
+
+                // עדכון מוני שאלות לפי השלב
+                if (["1", "2", "3", "4", "5"].includes(state.currentStage)) {
+                    state.analysisQuestionsCount++;
+                } else if (state.currentStage === "FINAL") {
+                    state.finalQuestionsCount++;
+                }
+
+                state.messages.push({ role: "model", text: replyText });
+                renderProgress();
+                renderMessages();
+            } catch (error) {
+                console.error("Bot-Kol Gemini API Error:", error);
+                state.messages.push({
+                    role: "model",
+                    isError: true,
+                    errorDetail: error?.message ? `שגיאה: ${error.message}` : "",
+                    text: "אירעה תקלה זמנית בחיבור לבוט קול. ניתן ללחוץ על 'נסה שוב' או לשלוח את ההודעה מחדש."
+                });
+                renderMessages();
+            } finally {
+                state.isLoading = false;
+                el.sendBtn.disabled = false;
+                el.typingIndicator.classList.add("hidden");
+                el.chatInput.focus();
+            }
+        }
+
+        // ניסיון חוזר על ההודעה האחרונה של המשתמשת
+        async function retryLastUserMessage() {
+            if (state.isLoading) return;
+            await executeBotTurn();
+        }
+
+        // שליחת הודעה לבוט קול
+        async function sendUserMessage(text) {
+            const cleanText = text.trim();
+            if (!cleanText || state.isLoading) return;
+
+            // הסרת הודעות שגיאה קודמות והוספת הודעת המשתמשת
+            state.messages = state.messages.filter(m => !m.isError);
+            state.messages.push({ role: "user", text: cleanText });
+            el.chatInput.value = "";
+            autoResizeTextarea();
+            renderMessages();
+
+            await executeBotTurn();
+        }
 
                 const payload = {
                     contents,
@@ -1206,7 +1309,7 @@
             state.finalQuestionsCount = 0;
             state.isLoading = false;
             state.messages = [
-                { role: "model", text: OPENING_MESSAGE }
+                { role: "model", text: OPENING_MESSAGE, isGreeting: true }
             ];
 
             renderProgress();
